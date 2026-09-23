@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-cream font-body text-neutral-800 antialiased;
+  }
+  ::selection {
+    background-color: theme("colors.lilac.200");
+    color: theme("colors.lilac.700");
+  }
+}
+
+@layer components {
+  .glass {
+    @apply border border-white/60 bg-white/70 shadow-soft backdrop-blur-xl;
+  }
+  .card-hover {
+    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-lilac-200/50;
+  }
+  .chip {
+    @apply rounded-full px-4 py-2 text-sm font-medium transition-colors;
+  }
+  .chip-active {
+    @apply bg-lilac-500 text-white shadow-md shadow-lilac-300/50;
+  }
+  .chip-idle {
+    @apply border border-neutral-200 bg-white text-neutral-600 hover:border-lilac-300 hover:text-lilac-600;
+  }
+  .chat-scroll::-webkit-scrollbar {
+    width: 6px;
+  }
+  .chat-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .chat-scroll::-webkit-scrollbar-thumb {
+    background-color: theme("colors.lilac.200");
+    border-radius: 9999px;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}

@@ -1,34 +1,38 @@
 import { Router } from "express";
 import OpenAI from "openai";
-import { places } from "../data/places";
+import { listPlaces } from "../lib/store";
 
 const router = Router();
 
 const client = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
 const model = process.env.OPENAI_MODEL ?? "gpt-4o-mini";
 
-const catalog = places.map(({ id, name, categoryLabel, location, vibe, description, tags }) => ({
-  id,
-  name,
-  categoryLabel,
-  location,
-  vibe,
-  description,
-  tags,
-}));
+function buildCatalog() {
+  return listPlaces().map(({ id, name, categoryLabel, location, vibe, description, tags }) => ({
+    id,
+    name,
+    categoryLabel,
+    location,
+    vibe,
+    description,
+    tags,
+  }));
+}
 
-const systemPrompt = `Eres el Conserje Vibe de LocalVibe Explorer, un asistente cálido que recomienda comercios y experiencias locales según el humor y los gustos de la persona.
+function buildSystemPrompt(): string {
+  return `Eres el Conserje Vibe de LocalVibe Explorer, un asistente cálido que recomienda comercios y experiencias locales según el humor y los gustos de la persona.
 Siempre respondes en español, con cercanía y sin jerga técnica.
-Tienes acceso a este catálogo: ${JSON.stringify(catalog)}
+Tienes acceso a este catálogo: ${JSON.stringify(buildCatalog())}
 Responde ÚNICAMENTE con JSON válido con esta forma: {"reply": "tu mensaje", "placeIds": ["id1","id2","id3"]}
 Escoje como máximo 3 placeIds del catálogo que mejor calcen con lo que la persona busca. Si no hay coincidencias, devuelve placeIds vacío.`;
+}
 
 const normalize = (value: string) =>
   value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
 function matchLocally(message: string): string[] {
   const tokens = normalize(message).split(/\W+/).filter(Boolean);
-  const scores = places
+  const scores = listPlaces()
     .map((place) => {
       const hay = normalize(
         [place.name, place.categoryLabel, place.location, place.vibe, ...place.tags].join(" ")
@@ -68,7 +72,7 @@ router.post("/", async (req, res) => {
       temperature: 0.8,
       response_format: { type: "json_object" },
       messages: [
-        { role: "system", content: systemPrompt },
+        { role: "system", content: buildSystemPrompt() },
         ...(Array.isArray(history) ? history.slice(-8) : []),
         { role: "user", content: userMessage },
       ],
@@ -76,7 +80,7 @@ router.post("/", async (req, res) => {
 
     const raw = chat.choices[0]?.message?.content ?? "{}";
     const parsed = JSON.parse(raw) as { reply?: string; placeIds?: string[] };
-    const validIds = new Set(places.map((place) => place.id));
+    const validIds = new Set(listPlaces().map((place) => place.id));
     const placeIds = (parsed.placeIds ?? [])
       .filter((id) => validIds.has(id))
       .slice(0, 3);

@@ -1,8 +1,11 @@
+import "dotenv/config";
 import cors from "cors";
 import express from "express";
 import placesRouter from "./routes/places";
 import conciergeRouter from "./routes/concierge";
 import adminRouter from "./routes/admin";
+import authRouter from "./routes/auth";
+import adminPlacesRouter from "./routes/adminPlaces";
 
 const app = express();
 const port = Number(process.env.PORT) || 4000;
@@ -17,7 +20,9 @@ app.get("/health", (_req, res) => {
 
 app.use("/api/places", placesRouter);
 app.use("/api/concierge", conciergeRouter);
+app.use("/api/admin", authRouter);
 app.use("/api/admin", adminRouter);
+app.use("/api/admin/places", adminPlacesRouter);
 
 app.use(
   (err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
