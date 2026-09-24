@@ -16,7 +16,7 @@
     "express": "^4.22.3",
     "express-rate-limit": "^7.4.0",
     "openai": "^4.52.0",
-    "word-wrap": "1.2.3"
+    "word-wrap": "1.2.5"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
