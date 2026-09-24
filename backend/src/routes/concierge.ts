@@ -7,8 +7,9 @@ const router = Router();
 const client = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
 const model = process.env.OPENAI_MODEL ?? "gpt-4o-mini";
 
-function buildCatalog() {
-  return listPlaces().map(({ id, name, categoryLabel, location, vibe, description, tags }) => ({
+async function buildCatalog() {
+  const all = await listPlaces();
+  return all.map(({ id, name, categoryLabel, location, vibe, description, tags }) => ({
     id,
     name,
     categoryLabel,
@@ -19,10 +20,11 @@ function buildCatalog() {
   }));
 }
 
-function buildSystemPrompt(): string {
+async function buildSystemPrompt(): Promise<string> {
+  const catalog = await buildCatalog();
   return `Eres el Conserje Vibe de LocalVibe Explorer, un asistente cálido que recomienda comercios y experiencias locales según el humor y los gustos de la persona.
 Siempre respondes en español, con cercanía y sin jerga técnica.
-Tienes acceso a este catálogo: ${JSON.stringify(buildCatalog())}
+Tienes acceso a este catálogo: ${JSON.stringify(catalog)}
 Responde ÚNICAMENTE con JSON válido con esta forma: {"reply": "tu mensaje", "placeIds": ["id1","id2","id3"]}
 Escoje como máximo 3 placeIds del catálogo que mejor calcen con lo que la persona busca. Si no hay coincidencias, devuelve placeIds vacío.`;
 }
@@ -30,17 +32,18 @@ Escoje como máximo 3 placeIds del catálogo que mejor calcen con lo que la pers
 const normalize = (value: string) =>
   value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
-function matchLocally(message: string): string[] {
+async function matchLocally(message: string): Promise<string[]> {
   const tokens = normalize(message).split(/\W+/).filter(Boolean);
-  const scores = listPlaces()
+  const all = await listPlaces();
+  const scores = all
     .map((place) => {
       const hay = normalize(
         [place.name, place.categoryLabel, place.location, place.vibe, ...place.tags].join(" ")
       );
       const score = tokens.reduce((acc, token) => acc + (hay.includes(token) ? 1 : 0), 0);
       return { id: place.id, score };
-    })
-    return scores
+    });
+  return scores
     .sort((a, b) => b.score - a.score)
     .filter((entry) => entry.score > 0)
     .slice(0, 3)
@@ -57,7 +60,7 @@ router.post("/", async (req, res) => {
   }
 
   if (!client) {
-    const placeIds = matchLocally(userMessage);
+    const placeIds = await matchLocally(userMessage);
     const reply =
       placeIds.length > 0
         ? "Claro, revisé el catálogo del barrio y estos lugares calzan perfecto con lo que buscas. ¡Échales un ojo!"
@@ -72,7 +75,7 @@ router.post("/", async (req, res) => {
       temperature: 0.8,
       response_format: { type: "json_object" },
       messages: [
-        { role: "system", content: buildSystemPrompt() },
+        { role: "system", content: await buildSystemPrompt() },
         ...(Array.isArray(history) ? history.slice(-8) : []),
         { role: "user", content: userMessage },
       ],
@@ -80,7 +83,7 @@ router.post("/", async (req, res) => {
 
     const raw = chat.choices[0]?.message?.content ?? "{}";
     const parsed = JSON.parse(raw) as { reply?: string; placeIds?: string[] };
-    const validIds = new Set(listPlaces().map((place) => place.id));
+    const validIds = new Set((await listPlaces()).map((place) => place.id));
     const placeIds = (parsed.placeIds ?? [])
       .filter((id) => validIds.has(id))
       .slice(0, 3);
@@ -90,7 +93,7 @@ router.post("/", async (req, res) => {
       placeIds,
     });
   } catch {
-    const placeIds = matchLocally(userMessage);
+    const placeIds = await matchLocally(userMessage);
     res.json({
       reply:
         placeIds.length > 0

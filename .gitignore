@@ -11,3 +11,4 @@ out/
 .terraform/
 *.tfstate*
 .terraform.lock.hcl
+backend/data/

@@ -2,7 +2,7 @@ import { PinIcon } from "./icons";
 
 export function Footer() {
   return (
-    <footer id="experiencias" className="border-t border-neutral-100 bg-white/60">
+    <footer className="border-t border-neutral-100 bg-white/60">
       <div className="mx-auto flex max-w-7xl flex-col items-center gap-4 px-6 py-12 text-center">
         <span className="grid h-10 w-10 place-items-center rounded-full bg-gradient-to-br from-blush-300 via-blush-400 to-lilac-400 text-white shadow-soft">
           <PinIcon className="h-5 w-5" />

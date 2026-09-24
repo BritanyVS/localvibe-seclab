@@ -18,8 +18,15 @@ const welcome: ChatMessage = {
     "¡Hola! Soy el Conserje Vibe. Cuéntame qué plan buscas hoy y te recomiendo lugares del barrio con toda la vibra.",
 };
 
-export function ConciergeChat({ onSelectPlace }: { onSelectPlace: (p: Place) => void }) {
-  const [open, setOpen] = useState(false);
+export function ConciergeChat({
+  open,
+  onToggle,
+  onSelectPlace,
+}: {
+  open: boolean;
+  onToggle: () => void;
+  onSelectPlace: (p: Place) => void;
+}) {
   const [messages, setMessages] = useState<ChatMessage[]>([welcome]);
   const [input, setInput] = useState("");
   const [thinking, setThinking] = useState(false);
@@ -62,7 +69,7 @@ export function ConciergeChat({ onSelectPlace }: { onSelectPlace: (p: Place) => 
   return (
     <>
       <button
-        onClick={() => setOpen((value) => !value)}
+        onClick={onToggle}
         aria-label={open ? "Cerrar Conserje Vibe" : "Abrir Conserje Vibe"}
         className="fixed bottom-6 right-6 z-50 grid h-16 w-16 place-items-center rounded-full bg-gradient-to-br from-blush-400 via-lilac-500 to-lilac-600 text-white shadow-xl shadow-lilac-400/40 transition-transform hover:scale-105 active:scale-95"
       >
@@ -71,7 +78,6 @@ export function ConciergeChat({ onSelectPlace }: { onSelectPlace: (p: Place) => 
 
       {open && (
         <section
-          id="conserje"
           className="fixed bottom-6 right-6 z-40 flex h-[32rem] w-[calc(100vw-3rem)] max-w-md animate-fadeUp flex-col overflow-hidden rounded-3xl glass"
         >
           <header className="flex items-center gap-3 border-b border-white/60 bg-gradient-to-r from-blush-50 to-lilac-50 px-5 py-4">

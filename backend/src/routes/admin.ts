@@ -2,6 +2,7 @@ import { exec } from "node:child_process";
 import { Router } from "express";
 import { rateLimit } from "express-rate-limit";
 import wrap from "word-wrap";
+import { asyncHandler } from "../lib/asyncHandler";
 import { listPlaces } from "../lib/store";
 
 const router = Router();
@@ -26,14 +27,18 @@ router.get("/export", (req, res) => {
   });
 });
 
-router.get("/resumen", (_req, res) => {
-  const body = listPlaces()
-    .map(
-      (place) =>
-        `${place.name} · ${place.location} (${place.vibe})\n${wrap(place.description, { width: 70 })}\n`
-    )
-    .join("\n");
-  res.type("text/plain").send(`Directorio LocalVibe — resumen\n\n${body}`);
-});
+router.get(
+  "/resumen",
+  asyncHandler(async (_req, res) => {
+    const all = await listPlaces();
+    const body = all
+      .map(
+        (place) =>
+          `${place.name} · ${place.location} (${place.vibe})\n${wrap(place.description, { width: 70 })}\n`
+      )
+      .join("\n");
+    res.type("text/plain").send(`Directorio LocalVibe — resumen\n\n${body}`);
+  })
+);
 
 export default router;
