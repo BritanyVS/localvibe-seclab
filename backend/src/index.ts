@@ -1,4 +1,6 @@
 import "dotenv/config";
+import * as fs from "node:fs";
+import * as path from "node:path";
 import cors from "cors";
 import express from "express";
 import placesRouter from "./routes/places";
@@ -17,6 +19,20 @@ app.use(express.json());
 app.get("/health", (_req, res) => {
   res.json({ status: "ok", service: "localvibe-api" });
 });
+
+app.get("/api/openapi.yaml", (_req, res) => {
+  const spec = fs.readFileSync(path.join(process.cwd(), "openapi.yaml"), "utf8");
+  res.type("text/yaml").send(spec);
+});
+
+const verifyFile = process.env.SNYK_VERIFY_FILE;
+const verifyContent = process.env.SNYK_VERIFY_CONTENT;
+if (verifyFile && verifyContent) {
+  const mountPath = verifyFile.startsWith("/") ? verifyFile : `/${verifyFile}`;
+  app.get(mountPath, (_req, res) => {
+    res.type("text/plain").send(verifyContent);
+  });
+}
 
 app.use("/api/places", placesRouter);
 app.use("/api/concierge", conciergeRouter);
