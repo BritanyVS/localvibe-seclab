@@ -9,7 +9,7 @@ const router = Router();
 
 const limiter = rateLimit({
   windowMs: 60 * 1000,
-  limit: 20,
+  limit: 600,
   standardHeaders: true,
   legacyHeaders: false,
 });
