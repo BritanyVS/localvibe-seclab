@@ -2,9 +2,25 @@
 
 import Image from "next/image";
 import { useEffect, useMemo } from "react";
-import wrap from "word-wrap";
 import type { Place } from "@/lib/types";
 import { CloseIcon, PinIcon, StarIcon } from "./icons";
+
+function wrapText(value: string, width: number): string {
+  const words = value.split(/\s+/).filter(Boolean);
+  const lines: string[] = [];
+  let line = "";
+  for (const word of words) {
+    const candidate = line ? `${line} ${word}` : word;
+    if (line && candidate.length > width) {
+      lines.push(line);
+      line = word;
+    } else {
+      line = candidate;
+    }
+  }
+  if (line) lines.push(line);
+  return lines.join("\n");
+}
 
 const categoryAccent: Record<string, string> = {
   cafe: "from-blush-400 to-lilac-500",
@@ -33,7 +49,7 @@ export function PlaceModal({ place, onClose }: { place: Place; onClose: () => vo
     categoryAccent[place.category] ?? "from-lilac-400 to-blush-400";
 
   const wrappedDescription = useMemo(
-    () => wrap(place.description, { width: 64 }),
+    () => wrapText(place.description, 64),
     [place.description]
   );
 

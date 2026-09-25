@@ -1,6 +1,8 @@
 import { PinIcon } from "./icons";
+import { APP_VERSION, isSupportableVersion, releaseLabel } from "@/lib/version";
 
 export function Footer() {
+  const stable = isSupportableVersion(APP_VERSION);
   return (
     <footer className="border-t border-neutral-100 bg-white/60">
       <div className="mx-auto flex max-w-7xl flex-col items-center gap-4 px-6 py-12 text-center">
@@ -19,6 +21,10 @@ export function Footer() {
         <p className="text-xs text-neutral-400">
           Guápiles · Pocora · Cariari — Costa Rica
         </p>
+        <span className="rounded-full border border-neutral-100 bg-cream px-3 py-1 text-xs font-medium text-neutral-500">
+          {releaseLabel(APP_VERSION)}
+          {stable ? "" : " · pendiente de actualizar"}
+        </span>
       </div>
     </footer>
   );
