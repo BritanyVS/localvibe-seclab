@@ -25,14 +25,9 @@ app.get("/api/openapi.yaml", (_req, res) => {
   res.type("text/yaml").send(spec);
 });
 
-const verifyFile = process.env.SNYK_VERIFY_FILE;
-const verifyContent = process.env.SNYK_VERIFY_CONTENT;
-if (verifyFile && verifyContent) {
-  const mountPath = verifyFile.startsWith("/") ? verifyFile : `/${verifyFile}`;
-  app.get(mountPath, (_req, res) => {
-    res.type("text/plain").send(verifyContent);
-  });
-}
+app.get("/60d5e20a-06ef-4cee-9145-4e89176405cc.txt", (_req, res) => {
+  res.type("text/plain").send("Probely");
+});
 
 app.use("/api/places", placesRouter);
 app.use("/api/concierge", conciergeRouter);
