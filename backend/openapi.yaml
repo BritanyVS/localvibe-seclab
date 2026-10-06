@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: LocalVibe Explorer API
-  description: Directorio de comercios, Conserje Vibe y panel de administración.
+  description: Directorio de comercios, asistente virtual Vibe y panel de administración.
   version: 1.4.2
 servers:
   - url: https://localvibe-api-kxga.onrender.com
@@ -11,7 +11,8 @@ servers:
 tags:
   - name: Salud
   - name: Catalogo
-  - name: Conserje
+  - name: Vibe
+    description: Asistente virtual con IA
   - name: Admin
 paths:
   /health:
@@ -77,8 +78,8 @@ paths:
           $ref: "#/components/responses/NotFound"
   /api/concierge:
     post:
-      tags: [Conserje]
-      summary: Conversa con el Conserje Vibe
+      tags: [Vibe]
+      summary: Conversa con Vibe, el asistente virtual
       requestBody:
         required: true
         content:
@@ -86,7 +87,7 @@ paths:
             schema: { $ref: "#/components/schemas/ConciergeRequest" }
       responses:
         "200":
-          description: Respuesta del conserje
+          description: Respuesta del asistente virtual
           content:
             application/json:
               schema: { $ref: "#/components/schemas/ConciergeReply" }

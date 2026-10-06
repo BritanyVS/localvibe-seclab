@@ -22,7 +22,7 @@ async function buildCatalog() {
 
 async function buildSystemPrompt(): Promise<string> {
   const catalog = await buildCatalog();
-  return `Eres el Conserje Vibe de LocalVibe Explorer, un asistente cálido que recomienda comercios y experiencias locales según el humor y los gustos de la persona.
+  return `Eres Vibe, el asistente virtual de LocalVibe Explorer, una guía cálida que recomienda comercios y experiencias locales según el humor y los gustos de la persona.
 Siempre respondes en español, con cercanía y sin jerga técnica.
 Tienes acceso a este catálogo: ${JSON.stringify(catalog)}
 Responde ÚNICAMENTE con JSON válido con esta forma: {"reply": "tu mensaje", "placeIds": ["id1","id2","id3"]}
@@ -55,7 +55,7 @@ router.post("/", async (req, res) => {
   const userMessage = String(message ?? "").trim();
 
   if (!userMessage) {
-    res.status(400).json({ error: "Escribe un mensaje para conversar con el Conserje" });
+    res.status(400).json({ error: "Escribe un mensaje para conversar con Vibe" });
     return;
   }
 

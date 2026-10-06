@@ -2,7 +2,7 @@
   "name": "localvibe-backend",
   "version": "1.0.0",
   "private": true,
-  "description": "API del directorio LocalVibe Explorer y Conserje Vibe",
+  "description": "API del directorio LocalVibe Explorer y asistente virtual Vibe",
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",

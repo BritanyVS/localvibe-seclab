@@ -55,7 +55,7 @@ export function PlaceModal({ place, onClose }: { place: Place; onClose: () => vo
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-neutral-900/40 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-neutral-800/40 p-4 backdrop-blur-sm"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
@@ -63,7 +63,7 @@ export function PlaceModal({ place, onClose }: { place: Place; onClose: () => vo
     >
       <div
         onClick={(event) => event.stopPropagation()}
-        className="relative w-full max-w-2xl animate-fadeUp overflow-hidden rounded-3xl bg-white shadow-2xl"
+        className="relative w-full max-w-2xl animate-fadeUp overflow-hidden rounded-3xl border border-blush-100 bg-white shadow-2xl shadow-blush-200/40"
       >
         <div className="relative aspect-[16/9] overflow-hidden">
           <Image src={place.image} alt={place.name} fill sizes="(max-width: 900px) 100vw, 800px" className="object-cover" />

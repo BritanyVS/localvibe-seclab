@@ -13,26 +13,27 @@ export function Hero({ query, onSearch, category, onCategory }: HeroProps) {
     <section className="relative overflow-hidden">
       <div
         aria-hidden
-        className="pointer-events-none absolute -top-24 right-0 h-96 w-96 rounded-full bg-blush-200/50 blur-3xl"
+        className="pointer-events-none absolute -top-24 right-0 h-96 w-96 rounded-full bg-blush-200/40 blur-3xl"
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute -left-24 top-40 h-96 w-96 rounded-full bg-lilac-200/40 blur-3xl"
+        className="pointer-events-none absolute -left-24 top-40 h-96 w-96 rounded-full bg-lilac-200/30 blur-3xl"
       />
       <div className="relative mx-auto max-w-7xl px-6 pb-16 pt-20 text-center">
-        <p className="mx-auto mb-5 flex w-fit items-center gap-2 rounded-full border border-gold-200 bg-gold-100/70 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-gold-500">
+        <p className="mx-auto mb-5 flex w-fit items-center gap-2 rounded-full border border-blush-100 bg-blush-50 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-blush-500">
           <SparklesIcon className="h-3.5 w-3.5" />
           El directorio de tu barrio
         </p>
 
         <h1 className="mx-auto max-w-3xl font-display text-5xl leading-tight tracking-tight text-neutral-900 sm:text-6xl">
-          Descubre la <span className="text-lilac-500">vibra</span> de los
+          Descubre la <em className="italic text-lilac-500">vibra</em> de los
           <span className="text-blush-400"> comercios</span> que aman tu zona
         </h1>
 
         <p className="mx-auto mt-5 max-w-xl text-lg text-neutral-500">
           Cafés, co-workings, tiendas ecológicas y experiencias únicas en Guápiles y la
-          región. Explóralos o pregúntale al Conserje Vibe qué calza con tu plan de hoy.
+          región. Explóralos o pregúntale a <span className="font-semibold text-lilac-500">Vibe</span>{" "}
+          qué calza con tu plan de hoy.
         </p>
 
         <form
@@ -41,9 +42,9 @@ export function Hero({ query, onSearch, category, onCategory }: HeroProps) {
             const input = event.currentTarget.query as HTMLInputElement;
             onSearch(input.value);
           }}
-          className="mx-auto mt-9 flex max-w-xl items-center gap-2 rounded-full border border-white/80 bg-white/90 p-2 shadow-soft backdrop-blur transition-shadow focus-within:shadow-gold"
+          className="mx-auto mt-9 flex max-w-xl items-center gap-2 rounded-full border border-blush-100 bg-white/90 p-2 shadow-soft backdrop-blur transition-shadow focus-within:shadow-gold"
         >
-          <span className="pl-3 text-neutral-400">
+          <span className="pl-3 text-blush-300">
             <SearchIcon className="h-5 w-5" />
           </span>
           <input
@@ -56,7 +57,7 @@ export function Hero({ query, onSearch, category, onCategory }: HeroProps) {
           />
           <button
             type="submit"
-            className="h-11 shrink-0 rounded-full bg-gradient-to-r from-blush-400 to-lilac-500 px-6 text-sm font-semibold text-white shadow-md shadow-blush-300/40 transition-transform hover:scale-[1.03] active:scale-95"
+            className="h-11 shrink-0 rounded-full bg-gradient-to-r from-blush-400 to-lilac-500 px-6 text-sm font-semibold text-white shadow-md shadow-blush-200/50 transition-transform hover:scale-[1.03] active:scale-95"
           >
             Buscar
           </button>

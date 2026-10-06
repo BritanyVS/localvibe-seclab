@@ -25,7 +25,7 @@ export async function askConcierge(
       history: history.map(({ role, content }) => ({ role, content })),
     }),
   });
-  if (!res.ok) throw new Error("El Conserje no pudo responder ahora");
+  if (!res.ok) throw new Error("Vibe no pudo responder ahora");
   return (await res.json()) as ConciergeReply;
 }
 

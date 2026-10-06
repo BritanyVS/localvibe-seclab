@@ -153,7 +153,7 @@ export default function AdminPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-cream via-blush-100 to-lilac-100">
+    <main className="min-h-screen bg-gradient-to-b from-cream via-blush-50/70 to-lilac-50">
       <Header />
 
       {!token ? (
@@ -170,7 +170,7 @@ export default function AdminPage() {
 
           <form
             onSubmit={handleLogin}
-            className="mt-8 w-full space-y-5 rounded-3xl border border-white/70 bg-white/70 p-8 shadow-soft backdrop-blur-xl"
+            className="mt-8 w-full space-y-5 rounded-3xl border border-blush-100/70 bg-white/80 p-8 shadow-soft backdrop-blur-xl"
           >
             <div className="space-y-1.5">
               <label htmlFor="admin-password" className={labelClass}>
@@ -192,7 +192,7 @@ export default function AdminPage() {
             <button
               type="submit"
               disabled={loading || !password}
-              className="w-full rounded-full bg-neutral-900 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-lilac-600 disabled:cursor-not-allowed disabled:opacity-50"
+              className="w-full rounded-full bg-gradient-to-r from-blush-400 to-lilac-500 px-5 py-3 text-sm font-semibold text-white shadow-md shadow-blush-200/50 transition-transform hover:scale-[1.02] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
             >
               {loading ? "Verificando…" : "Entrar al panel"}
             </button>
@@ -236,7 +236,7 @@ export default function AdminPage() {
             {places.map((place) => (
               <article
                 key={place.id}
-                className="flex flex-col overflow-hidden rounded-3xl border border-white/70 bg-white/70 shadow-soft backdrop-blur-xl"
+                className="flex flex-col overflow-hidden rounded-3xl border border-blush-100/70 bg-white/80 shadow-soft backdrop-blur-xl"
               >
                 <div
                   className="h-36 w-full bg-neutral-200"
@@ -319,7 +319,7 @@ function FormEditor({
   const place = editor.place;
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-neutral-900/40 p-4 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-neutral-800/40 p-4 backdrop-blur-sm">
       <form
         onSubmit={onSubmit}
         className="w-full max-w-2xl rounded-3xl border border-white/70 bg-cream p-8 shadow-soft"
@@ -475,7 +475,7 @@ function FormEditor({
           <button
             type="submit"
             disabled={loading || !place.name || !place.category}
-            className="rounded-full bg-neutral-900 px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-lilac-600 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-full bg-gradient-to-r from-blush-400 to-lilac-500 px-6 py-2.5 text-sm font-semibold text-white shadow-md shadow-blush-200/50 transition-transform hover:scale-[1.02] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
           >
             {loading ? "Guardando…" : editor.mode === "create" ? "Publicar" : "Guardar cambios"}
           </button>

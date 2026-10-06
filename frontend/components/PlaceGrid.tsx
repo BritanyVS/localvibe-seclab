@@ -9,12 +9,12 @@ type PlaceGridProps = {
 };
 
 const Skeleton = () => (
-  <div className="animate-pulse rounded-3xl border border-white/70 bg-white shadow-soft">
-    <div className="aspect-[4/3] rounded-t-3xl bg-neutral-100" />
+  <div className="animate-pulse rounded-3xl border border-blush-100/70 bg-white shadow-soft">
+    <div className="aspect-[4/3] rounded-t-3xl bg-blush-50" />
     <div className="space-y-3 p-5">
-      <div className="h-5 w-2/3 rounded-full bg-neutral-100" />
-      <div className="h-3 w-1/3 rounded-full bg-neutral-100" />
-      <div className="h-9 w-full rounded-2xl bg-neutral-100" />
+      <div className="h-5 w-2/3 rounded-full bg-blush-50" />
+      <div className="h-3 w-1/3 rounded-full bg-blush-50" />
+      <div className="h-9 w-full rounded-2xl bg-lilac-50" />
     </div>
   </div>
 );
@@ -58,7 +58,7 @@ export function PlaceGrid({ places, loading, error, onSelect }: PlaceGridProps) 
           </p>
           <p className="mx-auto mt-2 max-w-sm text-sm text-neutral-500">
             No encontramos lugares que calcen con esa búsqueda. Prueba con
-            otro término o pregúntale al Conserje.
+            otro término o pregúntale a Vibe.
           </p>
         </div>
       ) : (

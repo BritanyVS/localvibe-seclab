@@ -13,7 +13,7 @@ export function Experiences({ places, onSelect }: ExperiencesProps) {
   return (
     <section
       id="experiencias"
-      className="scroll-mt-20 border-y border-white/60 bg-gradient-to-b from-blush-50 via-white to-lilac-50"
+      className="scroll-mt-20 border-y border-blush-100/60 bg-gradient-to-b from-blush-50 via-white to-lilac-50"
     >
       <div className="mx-auto max-w-7xl px-6 py-16">
         <div className="flex flex-wrap items-end justify-between gap-4">
@@ -35,7 +35,7 @@ export function Experiences({ places, onSelect }: ExperiencesProps) {
           {shown.map((place) => (
             <article
               key={place.id}
-              className="card-hover flex flex-col overflow-hidden rounded-3xl border border-white/70 bg-white shadow-soft"
+              className="card-hover flex flex-col overflow-hidden rounded-3xl border border-blush-100/70 bg-white shadow-soft"
             >
               <div
                 className="h-44 w-full bg-neutral-200"
@@ -61,7 +61,7 @@ export function Experiences({ places, onSelect }: ExperiencesProps) {
                 <button
                   type="button"
                   onClick={() => onSelect(place)}
-                  className="mt-5 w-fit rounded-full bg-neutral-900 px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-lilac-600"
+                  className="mt-5 w-fit rounded-full bg-gradient-to-r from-blush-400 to-lilac-500 px-5 py-2 text-sm font-semibold text-white shadow-md shadow-blush-200/50 transition-transform hover:scale-[1.03] active:scale-95"
                 >
                   Ver este plan
                 </button>

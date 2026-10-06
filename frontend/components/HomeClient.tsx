@@ -9,7 +9,7 @@ import { Hero } from "./Hero";
 import { PlaceGrid } from "./PlaceGrid";
 import { Experiences } from "./Experiences";
 import { PlaceModal } from "./PlaceModal";
-import { ConciergeChat } from "./ConciergeChat";
+import { VibeChat } from "./VibeChat";
 import { Footer } from "./Footer";
 
 export function HomeClient({ initialQuery }: { initialQuery: string }) {
@@ -20,7 +20,7 @@ export function HomeClient({ initialQuery }: { initialQuery: string }) {
   const [category, setCategory] = useState("todos");
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<Place | null>(null);
-  const [conciergeOpen, setConciergeOpen] = useState(false);
+  const [vibeOpen, setVibeOpen] = useState(false);
 
   useEffect(() => {
     setQuery(initialQuery);
@@ -54,7 +54,7 @@ export function HomeClient({ initialQuery }: { initialQuery: string }) {
 
   return (
     <>
-      <Header onOpenConserje={() => setConciergeOpen(true)} />
+      <Header onOpenVibe={() => setVibeOpen(true)} />
       <Hero
         query={query}
         onSearch={applySearch}
@@ -64,9 +64,9 @@ export function HomeClient({ initialQuery }: { initialQuery: string }) {
       <PlaceGrid places={places} loading={loading} error={error} onSelect={setSelected} />
       <Experiences places={places} onSelect={setSelected} />
       <Footer />
-      <ConciergeChat
-        open={conciergeOpen}
-        onToggle={() => setConciergeOpen((value) => !value)}
+      <VibeChat
+        open={vibeOpen}
+        onToggle={() => setVibeOpen((value) => !value)}
         onSelectPlace={setSelected}
       />
       {selected && <PlaceModal place={selected} onClose={() => setSelected(null)} />}
