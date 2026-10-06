@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { fetchPlaces } from "@/lib/api";
-import type { Place } from "@/lib/types";
+import { fetchCategories, fetchPlaces } from "@/lib/api";
+import { categories as defaultCategories } from "@/lib/categories";
+import type { Category, Place } from "@/lib/types";
 import { Header } from "./Header";
 import { Hero } from "./Hero";
 import { PlaceGrid } from "./PlaceGrid";
@@ -18,6 +19,8 @@ export function HomeClient({ initialQuery }: { initialQuery: string }) {
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState(initialQuery);
   const [category, setCategory] = useState("todos");
+  const [province, setProvince] = useState("");
+  const [categoryList, setCategoryList] = useState<Category[]>(defaultCategories);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<Place | null>(null);
   const [vibeOpen, setVibeOpen] = useState(false);
@@ -28,8 +31,18 @@ export function HomeClient({ initialQuery }: { initialQuery: string }) {
 
   useEffect(() => {
     let active = true;
+    fetchCategories().then((list) => {
+      if (active) setCategoryList(list);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let active = true;
     setLoading(true);
-    fetchPlaces(query, category)
+    fetchPlaces(query, category, province)
       .then((result) => {
         if (active) {
           setPlaces(result);
@@ -45,7 +58,7 @@ export function HomeClient({ initialQuery }: { initialQuery: string }) {
     return () => {
       active = false;
     };
-  }, [query, category]);
+  }, [query, category, province]);
 
   const applySearch = (next: string) => {
     const url = next.trim() ? `/?q=${encodeURIComponent(next.trim())}` : "/";
@@ -60,6 +73,9 @@ export function HomeClient({ initialQuery }: { initialQuery: string }) {
         onSearch={applySearch}
         category={category}
         onCategory={setCategory}
+        province={province}
+        onProvince={setProvince}
+        categoryList={categoryList}
       />
       <PlaceGrid places={places} loading={loading} error={error} onSelect={setSelected} />
       <Experiences places={places} onSelect={setSelected} />

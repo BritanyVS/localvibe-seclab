@@ -3,7 +3,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { Header } from "@/components/Header";
 import { CloseIcon, CompassIcon, PinIcon, StarIcon } from "@/components/icons";
-import { categories } from "@/lib/categories";
+import { categories, provinces } from "@/lib/categories";
 import {
   adminCreatePlace,
   adminDeletePlace,
@@ -25,6 +25,7 @@ const emptyPlace = (): PlaceInput => ({
   name: "",
   category: "cafe",
   categoryLabel: "Cafés",
+  province: "San José",
   location: "",
   vibe: "",
   description: "",
@@ -35,6 +36,14 @@ const emptyPlace = (): PlaceInput => ({
   image: "",
   featured: false,
 });
+
+const slugify = (value: string) =>
+  value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 
 const inputClass =
   "w-full rounded-xl border border-neutral-200 bg-white/80 px-3.5 py-2.5 text-sm text-neutral-800 placeholder-neutral-400 outline-none transition focus:border-lilac-400 focus:ring-2 focus:ring-lilac-200";
@@ -113,6 +122,16 @@ export default function AdminPage() {
           .map((tag) => tag.trim())
           .filter(Boolean),
       };
+      if (input.category === "__custom") {
+        const label = input.categoryLabel.trim();
+        const id = slugify(label);
+        if (!label || !id) {
+          setError("Escribe el nombre de la categoría personalizada");
+          return;
+        }
+        input.category = id;
+        input.categoryLabel = label;
+      }
       if (editor.mode === "create") {
         await adminCreatePlace(token, input);
       } else {
@@ -141,6 +160,13 @@ export default function AdminPage() {
 
   const selectCategory = (id: string) => {
     if (!editor) return;
+    if (id === "__custom") {
+      setEditor({
+        ...editor,
+        place: { ...editor.place, category: "__custom", categoryLabel: "" },
+      });
+      return;
+    }
     const category = categories.find((entry) => entry.id === id);
     setEditor({
       ...editor,
@@ -206,7 +232,7 @@ export default function AdminPage() {
                 Gestión del directorio
               </h1>
               <p className="mt-1 text-sm text-neutral-500">
-                {places.length} comercios publicados en LocalVibe Explorer.
+                {places.length} lugares publicados en Costa Rica Vibe.
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -257,7 +283,10 @@ export default function AdminPage() {
                     </span>
                   </div>
                   <h3 className="mt-3 font-display text-lg text-neutral-800">{place.name}</h3>
-                  <p className="mt-1 flex-1 text-sm text-neutral-500">{place.location}</p>
+                  <p className="mt-1 flex-1 text-sm text-neutral-500">
+                    {place.province ? `${place.province} · ` : ""}
+                    {place.location}
+                  </p>
                   <div className="mt-4 flex items-center gap-2">
                     <button
                       type="button"
@@ -356,6 +385,10 @@ function FormEditor({
               onChange={(event) => onCategoryChange(event.target.value)}
               className={inputClass}
             >
+              {place.category !== "__custom" &&
+              !categories.some((category) => category.id === place.category) ? (
+                <option value={place.category}>{place.categoryLabel || place.category}</option>
+              ) : null}
               {categories
                 .filter((category) => category.id !== "todos")
                 .map((category) => (
@@ -363,8 +396,39 @@ function FormEditor({
                     {category.label}
                   </option>
                 ))}
+              <option value="__custom">Personalizada…</option>
             </select>
           </div>
+
+          <div className="space-y-1.5">
+            <label className={labelClass}>Provincia *</label>
+            <select
+              value={place.province}
+              onChange={(event) => onChange({ ...place, province: event.target.value })}
+              className={inputClass}
+            >
+              {!provinces.includes(place.province) ? (
+                <option value={place.province || ""}>{place.province || "Sin provincia"}</option>
+              ) : null}
+              {provinces.map((province) => (
+                <option key={province} value={province}>
+                  {province}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {place.category === "__custom" ? (
+            <div className="space-y-1.5 sm:col-span-2">
+              <label className={labelClass}>Nombre de la categoría personalizada *</label>
+              <input
+                value={place.categoryLabel}
+                onChange={(event) => onChange({ ...place, categoryLabel: event.target.value })}
+                placeholder="Ej. Mascotas, música, cine…"
+                className={inputClass}
+              />
+            </div>
+          ) : null}
 
           <div className="space-y-1.5">
             <label className={labelClass}>Zona / ubicación</label>
@@ -474,7 +538,12 @@ function FormEditor({
           </button>
           <button
             type="submit"
-            disabled={loading || !place.name || !place.category}
+            disabled={
+              loading ||
+              !place.name ||
+              !place.category ||
+              (place.category === "__custom" && !place.categoryLabel.trim())
+            }
             className="rounded-full bg-gradient-to-r from-blush-400 to-lilac-500 px-6 py-2.5 text-sm font-semibold text-white shadow-md shadow-blush-200/50 transition-transform hover:scale-[1.02] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
           >
             {loading ? "Guardando…" : editor.mode === "create" ? "Publicar" : "Guardar cambios"}

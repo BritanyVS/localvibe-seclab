@@ -10,19 +10,35 @@ const normalize = (value: string) =>
 
 const placeText = (place: Place) =>
   normalize(
-    [place.name, place.description, place.location, place.vibe, place.categoryLabel, ...place.tags].join(" ")
+    [place.name, place.description, place.location, place.vibe, place.categoryLabel, place.province ?? "", ...place.tags].join(" ")
   );
+
+router.get(
+  "/categories",
+  asyncHandler(async (_req, res) => {
+    const map = new Map<string, string>();
+    for (const place of await listPlaces()) {
+      if (!map.has(place.category)) map.set(place.category, place.categoryLabel);
+    }
+    res.json({ categories: [...map.entries()].map(([id, label]) => ({ id, label })) });
+  })
+);
 
 router.get(
   "/",
   asyncHandler(async (req, res) => {
     const q = normalize(String(req.query.q ?? "").trim());
     const category = String(req.query.category ?? "").trim().toLowerCase();
+    const province = normalize(String(req.query.province ?? "").trim());
 
     let results = await listPlaces();
 
     if (category && category !== "todos") {
       results = results.filter((place) => place.category.toLowerCase() === category);
+    }
+
+    if (province) {
+      results = results.filter((place) => normalize(place.province ?? "").includes(province));
     }
 
     if (q) {

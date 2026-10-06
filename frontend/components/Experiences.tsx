@@ -56,6 +56,7 @@ export function Experiences({ places, onSelect }: ExperiencesProps) {
                 <h3 className="mt-2 font-display text-xl text-neutral-800">{place.name}</h3>
                 <p className="mt-2 flex-1 text-sm leading-relaxed text-neutral-600">{place.vibe}</p>
                 <p className="mt-3 text-xs font-medium text-neutral-400">
+                  {place.province ? `${place.province} · ` : ""}
                   {place.location} · {place.hours}
                 </p>
                 <button

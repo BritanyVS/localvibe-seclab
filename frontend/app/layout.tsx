@@ -16,9 +16,9 @@ const nunito = Nunito({
 });
 
 export const metadata: Metadata = {
-  title: "LocalVibe Explorer · Descubre la vibra de tu barrio",
+  title: "Costa Rica Vibe · Descubre la vibra de las 7 provincias",
   description:
-    "Directorio inteligente de comercios locales, emprendimientos y experiencias de barrio, guiado por Vibe, tu asistente virtual.",
+    "Directorio inteligente de parques, playas, comercios y experiencias de Costa Rica, guiado por Vibe, tu asistente virtual.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -43,5 +43,5 @@ app.use(
 );
 
 app.listen(port, () => {
-  console.log(`LocalVibe API escuchando en http://localhost:${port}`);
+  console.log(`Costa Rica Vibe API escuchando en http://localhost:${port}`);
 });

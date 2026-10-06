@@ -56,7 +56,7 @@ router.get(
           `${place.name} · ${place.location} (${place.vibe})\n${wrapText(place.description, 70)}\n`
       )
       .join("\n");
-    res.type("text/plain").send(`Directorio LocalVibe — resumen\n\n${body}`);
+    res.type("text/plain").send(`Costa Rica Vibe — resumen\n\n${body}`);
   })
 );
 

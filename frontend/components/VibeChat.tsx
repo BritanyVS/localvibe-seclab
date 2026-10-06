@@ -8,14 +8,14 @@ import { ChatIcon, CloseIcon, SendIcon } from "./icons";
 
 const quickPrompts = [
   "Un café tranquilo para leer",
-  "Plan de fin de semana en pareja",
-  "Algo ecológico y de la zona",
+  "Quiero una actividad de acampada en Limón",
+  "Playas para el fin de semana en Guanacaste",
 ];
 
 const welcome: ChatMessage = {
   role: "assistant",
   content:
-    "¡Hola! Soy Vibe, tu asistente virtual. Cuéntame qué plan buscas hoy y te recomiendo lugares del barrio con toda la vibra.",
+    "¡Hola! Soy Vibe, tu asistente de Costa Rica Vibe. Decime provincia y qué plan tenés en mente, y te recomiendo lugares de las 7 provincias con toda la vibra.",
 };
 
 export function VibeChat({
@@ -87,7 +87,7 @@ export function VibeChat({
             </span>
             <div>
               <p className="font-display text-base font-semibold text-neutral-800">Vibe</p>
-              <p className="text-xs text-neutral-500">Tu asistente virtual con IA</p>
+              <p className="text-xs text-neutral-500">Tu guía de Costa Rica con IA</p>
             </div>
           </header>
 

@@ -30,6 +30,13 @@ const categoryAccent: Record<string, string> = {
   gastronomía: "from-gold-400 to-blush-400",
   experiencias: "from-lilac-400 to-blush-400",
   bienestar: "from-sky-300 to-lilac-400",
+  turismo: "from-emerald-300 to-teal-300",
+  estudio: "from-indigo-300 to-lilac-400",
+  comercios: "from-gold-300 to-blush-300",
+  ropa: "from-blush-300 to-rose-300",
+  calzado: "from-amber-300 to-rose-300",
+  estética: "from-rose-300 to-lilac-400",
+  supermercados: "from-lime-300 to-emerald-300",
 };
 
 export function PlaceModal({ place, onClose }: { place: Place; onClose: () => void }) {
@@ -96,6 +103,7 @@ export function PlaceModal({ place, onClose }: { place: Place; onClose: () => vo
           </h3>
           <p className="mt-1.5 flex items-center gap-1.5 text-sm text-neutral-500">
             <PinIcon className="h-4 w-4 text-lilac-400" />
+            {place.province ? `${place.province} · ` : ""}
             {place.location} · {place.hours}
           </p>
 

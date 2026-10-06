@@ -8,12 +8,12 @@ export function Header({ onOpenVibe }: HeaderProps) {
   return (
     <header className="sticky top-0 z-40 border-b border-blush-100/60 bg-cream/85 backdrop-blur-xl">
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-        <a href="/" className="flex items-center gap-2.5" aria-label="LocalVibe Explorer inicio">
+        <a href="/" className="flex items-center gap-2.5" aria-label="Costa Rica Vibe inicio">
           <span className="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-blush-300 via-blush-400 to-lilac-400 text-white shadow-soft">
             <PinIcon className="h-5 w-5" />
           </span>
           <span className="font-display text-lg tracking-tight text-neutral-800">
-            Local<span className="text-lilac-500">Vibe</span>
+            Costa Rica <span className="text-lilac-500">Vibe</span>
           </span>
         </a>
 

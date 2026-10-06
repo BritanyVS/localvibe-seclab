@@ -11,15 +11,15 @@ export function Footer() {
         </span>
         <div>
           <p className="font-display text-lg tracking-tight text-neutral-800">
-            Local<span className="text-lilac-500">Vibe</span> Explorer
+            Costa Rica <span className="text-lilac-500">Vibe</span>
           </p>
           <p className="mt-1 max-w-md text-sm text-neutral-500">
-            Conecta con los emprendimientos, tiendas y experiencias que dan
-            carácter a tu barrio.
+            Parques, playas, comercios y experiencias que dan carácter a las
+            7 provincias de Costa Rica.
           </p>
         </div>
         <p className="text-xs text-neutral-400">
-          Guápiles · Pocora · Cariari — Costa Rica
+          San José · Alajuela · Cartago · Heredia · Guanacaste · Puntarenas · Limón
         </p>
         <span className="rounded-full border border-neutral-100 bg-cream px-3 py-1 text-xs font-medium text-neutral-500">
           {releaseLabel(APP_VERSION)}

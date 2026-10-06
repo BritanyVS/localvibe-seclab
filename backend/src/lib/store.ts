@@ -23,6 +23,7 @@ type PlaceRow = {
   name: string;
   category: string;
   categoryLabel: string;
+  province: string;
   location: string;
   vibe: string;
   description: string;
@@ -41,6 +42,7 @@ CREATE TABLE IF NOT EXISTS places (
   name TEXT NOT NULL,
   category TEXT NOT NULL,
   category_label TEXT NOT NULL,
+  province TEXT NOT NULL DEFAULT '',
   location TEXT NOT NULL,
   vibe TEXT NOT NULL,
   description TEXT NOT NULL,
@@ -52,28 +54,35 @@ CREATE TABLE IF NOT EXISTS places (
   featured BOOLEAN NOT NULL DEFAULT FALSE
 );`;
 
+const ALTER_PROVINCE_SQL = `ALTER TABLE places ADD COLUMN IF NOT EXISTS province TEXT NOT NULL DEFAULT '';`;
+
 const SELECT_SQL = `
-SELECT id, slug, name, category, category_label AS "categoryLabel",
+SELECT id, slug, name, category, category_label AS "categoryLabel", province,
   location, vibe, description, tags, price, rating, hours, image, featured
 FROM places
 ORDER BY id::int DESC;`;
 
 const SELECT_WHERE_SQL = `
-SELECT id, slug, name, category, category_label AS "categoryLabel",
+SELECT id, slug, name, category, category_label AS "categoryLabel", province,
   location, vibe, description, tags, price, rating, hours, image, featured
 FROM places
 WHERE id = $1;`;
 
 const INSERT_SQL = `
-INSERT INTO places (id, slug, name, category, category_label, location, vibe, description, tags, price, rating, hours, image, featured)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb, $10, $11, $12, $13, $14)
+INSERT INTO places (id, slug, name, category, category_label, location, vibe, description, tags, price, rating, hours, image, featured, province)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb, $10, $11, $12, $13, $14, $15)
 RETURNING *;`;
+
+const INSERT_SEED_SQL = `
+INSERT INTO places (id, slug, name, category, category_label, location, vibe, description, tags, price, rating, hours, image, featured, province)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb, $10, $11, $12, $13, $14, $15)
+ON CONFLICT (slug) DO NOTHING;`;
 
 const UPDATE_SQL = `
 UPDATE places
 SET slug = $2, name = $3, category = $4, category_label = $5, location = $6,
   vibe = $7, description = $8, tags = $9::jsonb, price = $10, rating = $11,
-  hours = $12, image = $13, featured = $14
+  hours = $12, image = $13, featured = $14, province = $15
 WHERE id = $1
 RETURNING *;`;
 
@@ -87,13 +96,14 @@ function readyPostgres(): Promise<void> {
   if (!pool) return Promise.resolve();
   pgReady ??= (async () => {
     await pool.query(CREATE_TABLE_SQL);
-    const { rows } = await pool.query<{ count: number }>(
-      `SELECT COUNT(*)::int AS count FROM places;`
-    );
-    if (rows[0]?.count === 0) {
-      for (const place of seed) {
-        await insertRow(place);
-      }
+    await pool.query(ALTER_PROVINCE_SQL);
+    for (const place of seed) {
+      const { rows } = await pool.query<{ next: number }>(NEXT_ID_SQL);
+      await pool.query(INSERT_SEED_SQL, [String(rows[0]?.next ?? 1), ...placeParams(place).slice(1)]);
+      await pool.query(
+        `UPDATE places SET province = $1 WHERE slug = $2 AND (province IS NULL OR province = '');`,
+        [place.province, place.slug]
+      );
     }
   })();
   return pgReady;
@@ -106,6 +116,7 @@ function rowToPlace(row: PlaceRow): Place {
     name: row.name,
     category: row.category,
     categoryLabel: row.categoryLabel,
+    province: row.province ?? "",
     location: row.location,
     vibe: row.vibe,
     description: row.description,
@@ -134,6 +145,7 @@ function placeParams(place: Place): unknown[] {
     place.hours,
     place.image,
     place.featured,
+    place.province,
   ];
 }
 
@@ -159,7 +171,7 @@ function loadJsonItems(): Place[] {
   try {
     if (fs.existsSync(FILE)) {
       const parsed = JSON.parse(fs.readFileSync(FILE, "utf8"));
-      if (Array.isArray(parsed)) return parsed as Place[];
+      if (Array.isArray(parsed)) return (parsed as Place[]).map((item) => ({ ...item, province: item.province ?? "" }));
     }
   } catch {
   }

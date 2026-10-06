@@ -33,6 +33,7 @@ export function PlaceCard({ place, onSelect }: { place: Place; onSelect: (p: Pla
 
         <p className="mt-2 flex items-center gap-1.5 text-sm text-neutral-500">
           <PinIcon className="h-4 w-4 text-lilac-400" />
+          {place.province ? `${place.province} · ` : ""}
           {place.location}
         </p>
 

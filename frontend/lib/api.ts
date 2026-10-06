@@ -1,16 +1,33 @@
-import type { ChatMessage, ConciergeReply, Place, PlaceInput } from "./types";
+import { categories as defaultCategories } from "./categories";
+import type { Category, ChatMessage, ConciergeReply, Place, PlaceInput } from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
-export async function fetchPlaces(q = "", category = "todos"): Promise<Place[]> {
+export async function fetchPlaces(q = "", category = "todos", province = ""): Promise<Place[]> {
   const params = new URLSearchParams();
   if (q.trim()) params.set("q", q.trim());
   if (category && category !== "todos") params.set("category", category);
+  if (province && province !== "todas") params.set("province", province);
 
   const res = await fetch(`${API_URL}/api/places?${params.toString()}`);
   if (!res.ok) throw new Error("No se pudo cargar el directorio");
   const data = (await res.json()) as { places: Place[] };
   return data.places;
+}
+
+export async function fetchCategories(): Promise<Category[]> {
+  try {
+    const res = await fetch(`${API_URL}/api/places/categories`);
+    if (!res.ok) return defaultCategories;
+    const data = (await res.json()) as { categories: Category[] };
+    const byId = new Map(defaultCategories.map((item) => [item.id, item]));
+    for (const item of data.categories) {
+      if (!byId.has(item.id)) byId.set(item.id, item);
+    }
+    return [...byId.values()];
+  } catch {
+    return defaultCategories;
+  }
 }
 
 export async function askConcierge(

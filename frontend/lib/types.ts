@@ -4,6 +4,7 @@ export type Place = {
   name: string;
   category: string;
   categoryLabel: string;
+  province: string;
   location: string;
   vibe: string;
   description: string;

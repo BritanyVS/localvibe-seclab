@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
-  title: LocalVibe Explorer API
-  description: Directorio de comercios, asistente virtual Vibe y panel de administración.
+  title: Costa Rica Vibe API
+  description: Directorio de lugares y experiencias de las 7 provincias de Costa Rica, asistente virtual Vibe y panel de administración.
   version: 1.4.2
 servers:
   - url: https://localvibe-api-kxga.onrender.com
@@ -46,6 +46,10 @@ paths:
           in: query
           schema: { type: string }
           description: Categoría exacta (o "todos").
+        - name: province
+          in: query
+          schema: { type: string }
+          description: Filtra por provincia (ej. "Limón", "Guanacaste").
       responses:
         "200":
           description: Lista de lugares
@@ -59,6 +63,25 @@ paths:
                   places:
                     type: array
                     items: { $ref: "#/components/schemas/Place" }
+  /api/places/categories:
+    get:
+      tags: [Catalogo]
+      summary: Categorías disponibles en el catálogo
+      responses:
+        "200":
+          description: Lista de categorías con su etiqueta
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  categories:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: string }
+                        label: { type: string }
   /api/places/{slug}:
     get:
       tags: [Catalogo]
@@ -279,6 +302,7 @@ components:
         - name
         - category
         - categoryLabel
+        - province
         - location
         - vibe
         - description
@@ -297,9 +321,12 @@ components:
           type: string
         category:
           type: string
-          enum: [cafe, coworking, eco, artesania, gastronomia, experiencias, bienestar]
+          description: Identificador de la categoría (ej. turismo, cafe, estudio).
         categoryLabel:
           type: string
+        province:
+          type: string
+          description: Provincia de Costa Rica (ej. Limón, Guanacaste).
         location:
           type: string
         vibe:
@@ -330,6 +357,8 @@ components:
         category:
           type: string
         categoryLabel:
+          type: string
+        province:
           type: string
         location:
           type: string
