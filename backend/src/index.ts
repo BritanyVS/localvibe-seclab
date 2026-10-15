@@ -8,6 +8,7 @@ import conciergeRouter from "./routes/concierge";
 import adminRouter from "./routes/admin";
 import authRouter from "./routes/auth";
 import adminPlacesRouter from "./routes/adminPlaces";
+import reviewsRouter from "./routes/reviews";
 
 const app = express();
 const port = Number(process.env.PORT) || 4000;
@@ -30,6 +31,7 @@ app.get("/60d5e20a-06ef-4cee-9145-4e89176405cc.txt", (_req, res) => {
 });
 
 app.use("/api/places", placesRouter);
+app.use("/api", reviewsRouter);
 app.use("/api/concierge", conciergeRouter);
 app.use("/api/admin", authRouter);
 app.use("/api/admin", adminRouter);

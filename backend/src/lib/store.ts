@@ -1,5 +1,6 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { randomBytes, randomUUID, scrypt, timingSafeEqual } from "node:crypto";
 import { Pool } from "pg";
 import { places as seed, type Place } from "../data/places";
 
@@ -35,6 +36,45 @@ type PlaceRow = {
   featured: boolean;
 };
 
+export type Review = {
+  id: string;
+  placeId: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+type StoredReview = Review & {
+  email: string;
+  passwordHash: string;
+};
+
+type ReviewCredentials = {
+  email: string;
+  password: string;
+};
+
+type ReviewInput = ReviewCredentials & {
+  placeId: string;
+  rating: number;
+  comment: string;
+};
+
+type ReviewRow = {
+  id: string;
+  placeId: string;
+  email: string;
+  passwordHash: string;
+  rating: number;
+  comment: string;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+};
+
+export class DuplicateReviewError extends Error {}
+export class ReviewOwnershipError extends Error {}
+
 const CREATE_TABLE_SQL = `
 CREATE TABLE IF NOT EXISTS places (
   id TEXT PRIMARY KEY,
@@ -52,6 +92,19 @@ CREATE TABLE IF NOT EXISTS places (
   hours TEXT NOT NULL,
   image TEXT NOT NULL,
   featured BOOLEAN NOT NULL DEFAULT FALSE
+);`;
+
+const CREATE_REVIEWS_TABLE_SQL = `
+CREATE TABLE IF NOT EXISTS reviews (
+  id TEXT PRIMARY KEY,
+  place_id TEXT NOT NULL REFERENCES places(id) ON DELETE CASCADE,
+  email TEXT NOT NULL,
+  password_hash TEXT NOT NULL,
+  rating INTEGER NOT NULL CHECK (rating BETWEEN 1 AND 5),
+  comment TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (place_id, email)
 );`;
 
 const ALTER_PROVINCE_SQL = `ALTER TABLE places ADD COLUMN IF NOT EXISTS province TEXT NOT NULL DEFAULT '';`;
@@ -97,6 +150,7 @@ function readyPostgres(): Promise<void> {
   pgReady ??= (async () => {
     await pool.query(CREATE_TABLE_SQL);
     await pool.query(ALTER_PROVINCE_SQL);
+    await pool.query(CREATE_REVIEWS_TABLE_SQL);
     for (const place of seed) {
       const { rows } = await pool.query<{ next: number }>(NEXT_ID_SQL);
       await pool.query(INSERT_SEED_SQL, [String(rows[0]?.next ?? 1), ...placeParams(place).slice(1)]);
@@ -259,6 +313,202 @@ export async function removePlace(id: string): Promise<boolean> {
   jsonItems ??= loadJsonItems();
   const before = jsonItems.length;
   jsonItems = jsonItems.filter((place) => place.id !== id);
-  if (jsonItems.length < before) persistJson(jsonItems);
+  if (jsonItems.length < before) {
+    persistJson(jsonItems);
+    jsonReviews = loadJsonReviews().filter((review) => review.placeId !== id);
+    persistJsonReviews(jsonReviews);
+  }
   return jsonItems.length < before;
+}
+
+const REVIEWS_FILE = process.env.REVIEWS_FILE ?? path.join(path.dirname(FILE), "reviews.json");
+const PASSWORD_KEY_LENGTH = 64;
+let jsonReviews: StoredReview[] | null = null;
+
+function derivePassword(password: string, salt: Buffer): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    scrypt(password, salt, PASSWORD_KEY_LENGTH, (error, derivedKey) => {
+      if (error) reject(error);
+      else resolve(derivedKey);
+    });
+  });
+}
+
+async function hashPassword(password: string): Promise<string> {
+  const salt = randomBytes(16);
+  const derivedKey = await derivePassword(password, salt);
+  return `${salt.toString("hex")}:${derivedKey.toString("hex")}`;
+}
+
+async function verifyPassword(password: string, hash: string): Promise<boolean> {
+  const [saltHex, keyHex] = hash.split(":");
+  if (!saltHex || !keyHex || !/^[a-f0-9]+$/i.test(saltHex) || !/^[a-f0-9]+$/i.test(keyHex)) {
+    return false;
+  }
+  const expected = Buffer.from(keyHex, "hex");
+  if (expected.length !== PASSWORD_KEY_LENGTH) return false;
+  const actual = await derivePassword(password, Buffer.from(saltHex, "hex"));
+  return timingSafeEqual(actual, expected);
+}
+
+function persistJsonReviews(items: StoredReview[]): void {
+  fs.mkdirSync(path.dirname(REVIEWS_FILE), { recursive: true });
+  fs.writeFileSync(REVIEWS_FILE, JSON.stringify(items, null, 2));
+}
+
+function loadJsonReviews(): StoredReview[] {
+  if (!fs.existsSync(REVIEWS_FILE)) return [];
+  const parsed: unknown = JSON.parse(fs.readFileSync(REVIEWS_FILE, "utf8"));
+  if (!Array.isArray(parsed)) throw new Error("El archivo de reseñas no contiene una lista válida");
+  return parsed as StoredReview[];
+}
+
+function getJsonReviews(): StoredReview[] {
+  jsonReviews ??= loadJsonReviews();
+  return jsonReviews;
+}
+
+function rowToStoredReview(row: ReviewRow): StoredReview {
+  return {
+    id: row.id,
+    placeId: row.placeId,
+    email: row.email,
+    passwordHash: row.passwordHash,
+    rating: Number(row.rating),
+    comment: row.comment,
+    createdAt: new Date(row.createdAt).toISOString(),
+    updatedAt: new Date(row.updatedAt).toISOString(),
+  };
+}
+
+function publicReview(review: StoredReview): Review {
+  const { email: _email, passwordHash: _passwordHash, ...visible } = review;
+  return visible;
+}
+
+function normalizeEmail(email: string): string {
+  return email.trim().toLowerCase();
+}
+
+async function findStoredReview(id: string): Promise<StoredReview | undefined> {
+  if (pool) {
+    await readyPostgres();
+    const { rows } = await pool.query<ReviewRow>(
+      `SELECT id, place_id AS "placeId", email, password_hash AS "passwordHash",
+        rating, comment, created_at AS "createdAt", updated_at AS "updatedAt"
+      FROM reviews WHERE id = $1;`,
+      [id]
+    );
+    return rows[0] ? rowToStoredReview(rows[0]) : undefined;
+  }
+  return getJsonReviews().find((review) => review.id === id);
+}
+
+export async function listReviews(placeId: string): Promise<Review[]> {
+  if (pool) {
+    await readyPostgres();
+    const { rows } = await pool.query<ReviewRow>(
+      `SELECT id, place_id AS "placeId", email, password_hash AS "passwordHash",
+        rating, comment, created_at AS "createdAt", updated_at AS "updatedAt"
+      FROM reviews WHERE place_id = $1 ORDER BY created_at DESC;`,
+      [placeId]
+    );
+    return rows.map((row) => publicReview(rowToStoredReview(row)));
+  }
+  return getJsonReviews()
+    .filter((review) => review.placeId === placeId)
+    .sort((left, right) => right.createdAt.localeCompare(left.createdAt))
+    .map(publicReview);
+}
+
+export async function createReview(input: ReviewInput): Promise<Review> {
+  const email = normalizeEmail(input.email);
+  const passwordHash = await hashPassword(input.password);
+  const review: StoredReview = {
+    id: randomUUID(),
+    placeId: input.placeId,
+    email,
+    passwordHash,
+    rating: input.rating,
+    comment: input.comment,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  if (pool) {
+    await readyPostgres();
+    try {
+      const { rows } = await pool.query<ReviewRow>(
+        `INSERT INTO reviews (id, place_id, email, password_hash, rating, comment)
+        VALUES ($1, $2, $3, $4, $5, $6)
+        RETURNING id, place_id AS "placeId", email, password_hash AS "passwordHash",
+          rating, comment, created_at AS "createdAt", updated_at AS "updatedAt";`,
+        [review.id, review.placeId, email, passwordHash, input.rating, input.comment]
+      );
+      return publicReview(rowToStoredReview(rows[0]));
+    } catch (error) {
+      if ((error as { code?: string }).code === "23505") throw new DuplicateReviewError();
+      throw error;
+    }
+  }
+
+  const reviews = getJsonReviews();
+  if (reviews.some((item) => item.placeId === review.placeId && item.email === email)) {
+    throw new DuplicateReviewError();
+  }
+  reviews.push(review);
+  persistJsonReviews(reviews);
+  return publicReview(review);
+}
+
+export async function updateReview(
+  id: string,
+  credentials: ReviewCredentials,
+  input: Pick<Review, "rating" | "comment">
+): Promise<Review | undefined> {
+  const review = await findStoredReview(id);
+  if (!review) return undefined;
+  if (
+    review.email !== normalizeEmail(credentials.email) ||
+    !(await verifyPassword(credentials.password, review.passwordHash))
+  ) {
+    throw new ReviewOwnershipError();
+  }
+
+  const updated = { ...review, ...input, updatedAt: new Date().toISOString() };
+  if (pool) {
+    await pool.query(
+      `UPDATE reviews SET rating = $2, comment = $3, updated_at = NOW() WHERE id = $1;`,
+      [id, input.rating, input.comment]
+    );
+    return publicReview({ ...updated, updatedAt: new Date().toISOString() });
+  }
+  const reviews = getJsonReviews();
+  const index = reviews.findIndex((item) => item.id === id);
+  if (index < 0) return undefined;
+  reviews[index] = updated;
+  persistJsonReviews(reviews);
+  return publicReview(updated);
+}
+
+export async function deleteReview(
+  id: string,
+  credentials: ReviewCredentials
+): Promise<boolean> {
+  const review = await findStoredReview(id);
+  if (!review) return false;
+  if (
+    review.email !== normalizeEmail(credentials.email) ||
+    !(await verifyPassword(credentials.password, review.passwordHash))
+  ) {
+    throw new ReviewOwnershipError();
+  }
+
+  if (pool) {
+    await pool.query(`DELETE FROM reviews WHERE id = $1;`, [id]);
+    return true;
+  }
+  jsonReviews = getJsonReviews().filter((item) => item.id !== id);
+  persistJsonReviews(jsonReviews);
+  return true;
 }

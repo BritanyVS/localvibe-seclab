@@ -1,5 +1,13 @@
 import { categories as defaultCategories } from "./categories";
-import type { Category, ChatMessage, ConciergeReply, Place, PlaceInput } from "./types";
+import type {
+  Category,
+  ChatMessage,
+  ConciergeReply,
+  Place,
+  PlaceInput,
+  Review,
+  ReviewInput,
+} from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
@@ -13,6 +21,55 @@ export async function fetchPlaces(q = "", category = "todos", province = ""): Pr
   if (!res.ok) throw new Error("No se pudo cargar el directorio");
   const data = (await res.json()) as { places: Place[] };
   return data.places;
+}
+
+async function reviewRequest(path: string, init?: RequestInit): Promise<Response> {
+  const res = await fetch(`${API_URL}${path}`, {
+    ...init,
+    headers: {
+      "Content-Type": "application/json",
+      ...(init?.headers ?? {}),
+    },
+  });
+  if (!res.ok) {
+    const data = (await res.json().catch(() => null)) as { error?: string } | null;
+    throw new Error(data?.error ?? "No se pudo completar la operación de reseña");
+  }
+  return res;
+}
+
+export async function fetchPlaceReviews(placeId: string): Promise<Review[]> {
+  const res = await reviewRequest(`/api/places/${encodeURIComponent(placeId)}/reviews`);
+  const data = (await res.json()) as { reviews: Review[] };
+  return data.reviews;
+}
+
+export async function createPlaceReview(placeId: string, review: ReviewInput): Promise<Review> {
+  const res = await reviewRequest(`/api/places/${encodeURIComponent(placeId)}/reviews`, {
+    method: "POST",
+    body: JSON.stringify(review),
+  });
+  const data = (await res.json()) as { review: Review };
+  return data.review;
+}
+
+export async function updatePlaceReview(id: string, review: ReviewInput): Promise<Review> {
+  const res = await reviewRequest(`/api/reviews/${encodeURIComponent(id)}`, {
+    method: "PUT",
+    body: JSON.stringify(review),
+  });
+  const data = (await res.json()) as { review: Review };
+  return data.review;
+}
+
+export async function deletePlaceReview(
+  id: string,
+  credentials: Pick<ReviewInput, "email" | "password">
+): Promise<void> {
+  await reviewRequest(`/api/reviews/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+    body: JSON.stringify(credentials),
+  });
 }
 
 export async function fetchCategories(): Promise<Category[]> {

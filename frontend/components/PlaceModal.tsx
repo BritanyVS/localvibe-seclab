@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useMemo } from "react";
 import type { Place } from "@/lib/types";
 import { CloseIcon, PinIcon, StarIcon } from "./icons";
+import { PlaceReviews } from "./PlaceReviews";
 
 function wrapText(value: string, width: number): string {
   const words = value.split(/\s+/).filter(Boolean);
@@ -125,6 +126,8 @@ export function PlaceModal({ place, onClose }: { place: Place; onClose: () => vo
               </span>
             ))}
           </div>
+
+          <PlaceReviews placeId={place.id} />
         </div>
       </div>
     </div>

@@ -18,6 +18,22 @@ export type Place = {
 
 export type PlaceInput = Omit<Place, "id" | "slug">;
 
+export type Review = {
+  id: string;
+  placeId: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ReviewInput = {
+  email: string;
+  password: string;
+  rating: number;
+  comment: string;
+};
+
 export type Category = {
   id: string;
   label: string;

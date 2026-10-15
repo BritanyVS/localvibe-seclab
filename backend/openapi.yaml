@@ -11,6 +11,8 @@ servers:
 tags:
   - name: Salud
   - name: Catalogo
+  - name: Reseñas
+    description: Calificaciones y opiniones de los comercios
   - name: Vibe
     description: Asistente virtual con IA
   - name: Admin
@@ -97,6 +99,107 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Place" }
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /api/places/{placeId}/reviews:
+    get:
+      tags: [Reseñas]
+      summary: Lista reseñas públicas de un comercio
+      parameters:
+        - name: placeId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Reseñas y promedio de calificación
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reviews:
+                    type: array
+                    items: { $ref: "#/components/schemas/Review" }
+                  count:
+                    type: integer
+                  average:
+                    type: number
+                    format: float
+                    nullable: true
+        "404":
+          $ref: "#/components/responses/NotFound"
+    post:
+      tags: [Reseñas]
+      summary: Publica una reseña para un comercio
+      parameters:
+        - name: placeId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ReviewInput" }
+      responses:
+        "201":
+          description: Reseña creada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  review: { $ref: "#/components/schemas/Review" }
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          description: Ya existe una reseña con ese correo para el comercio
+  /api/reviews/{reviewId}:
+    put:
+      tags: [Reseñas]
+      summary: Edita una reseña usando las credenciales de su autora o autor
+      parameters:
+        - name: reviewId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ReviewInput" }
+      responses:
+        "200":
+          description: Reseña actualizada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  review: { $ref: "#/components/schemas/Review" }
+        "403":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      tags: [Reseñas]
+      summary: Elimina una reseña usando las credenciales de su autora o autor
+      parameters:
+        - name: reviewId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ReviewCredentials" }
+      responses:
+        "204":
+          description: Reseña eliminada
+        "403":
+          $ref: "#/components/responses/Unauthorized"
         "404":
           $ref: "#/components/responses/NotFound"
   /api/concierge:
@@ -381,6 +484,52 @@ components:
           format: uri
         featured:
           type: boolean
+    Review:
+      type: object
+      required: [id, placeId, rating, comment, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+        placeId:
+          type: string
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        comment:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    ReviewCredentials:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+          minLength: 8
+          maxLength: 128
+    ReviewInput:
+      allOf:
+        - $ref: "#/components/schemas/ReviewCredentials"
+        - type: object
+          required: [rating, comment]
+          properties:
+            rating:
+              type: integer
+              minimum: 1
+              maximum: 5
+            comment:
+              type: string
+              minLength: 1
+              maxLength: 1000
     ConciergeRequest:
       type: object
       required: [message]
