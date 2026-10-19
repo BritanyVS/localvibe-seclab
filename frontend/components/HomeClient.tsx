@@ -76,6 +76,8 @@ export function HomeClient({ initialQuery }: { initialQuery: string }) {
         province={province}
         onProvince={setProvince}
         categoryList={categoryList}
+        resultCount={places.length}
+        loading={loading}
       />
       <PlaceGrid places={places} loading={loading} error={error} onSelect={setSelected} />
       <Experiences places={places} onSelect={setSelected} />
