@@ -1,7 +1,6 @@
 import { provinces } from "@/lib/categories";
 import type { Category } from "@/lib/types";
 import { SearchIcon, SparklesIcon } from "./icons";
-import { ProvinceMap } from "./ProvinceMap";
 
 type HeroProps = {
   query: string;
@@ -106,43 +105,11 @@ export function Hero({
           ))}
         </div>
 
-        <section className="mx-auto mt-14 max-w-4xl overflow-hidden rounded-[2rem] border border-blush-100 bg-white/80 p-6 text-left shadow-soft backdrop-blur sm:p-9">
-          <div className="grid items-center gap-7 sm:grid-cols-[1fr_1.1fr] sm:gap-10">
-            <ProvinceMap province={province} onProvince={onProvince} />
-            <div className="text-center sm:text-left">
-              <span className="inline-flex items-center gap-2 rounded-full bg-blush-50 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-blush-500">
-                <span className="h-2 w-2 rounded-full bg-blush-400" />
-                Explora el mapa
-              </span>
-              <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-neutral-900 sm:text-4xl">
-                Costa Rica, <span className="text-blush-400">a tu manera</span>
-              </h2>
-              <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-neutral-500 sm:mx-0 sm:text-base">
-                Elige una provincia en el mapa y descubre los comercios y experiencias que tiene
-                para ti.
-              </p>
-              <div className="mt-5 flex flex-wrap items-center justify-center gap-3 sm:justify-start">
-                <span className="rounded-full border border-blush-100 bg-blush-50 px-4 py-2 text-sm font-semibold text-blush-600">
-                  {province || "Todas las provincias"}
-                </span>
-                {province && (
-                  <button
-                    type="button"
-                    onClick={() => onProvince("")}
-                    className="text-sm font-semibold text-neutral-500 underline decoration-blush-300 underline-offset-4 transition-colors hover:text-blush-500"
-                  >
-                    Ver todas
-                  </button>
-                )}
-              </div>
-              <p aria-live="polite" className="mt-4 text-sm text-neutral-500">
-                {loading
-                  ? "Buscando lugares…"
-                  : `${resultCount} ${resultCount === 1 ? "lugar encontrado" : "lugares encontrados"}${province ? ` en ${province}` : ""}`}
-              </p>
-            </div>
-          </div>
-        </section>
+        <p aria-live="polite" className="mt-10 text-sm text-neutral-500">
+          {loading
+            ? "Buscando lugares…"
+            : `${resultCount} ${resultCount === 1 ? "lugar encontrado" : "lugares encontrados"}${province ? ` en ${province}` : ""}`}
+        </p>
       </div>
     </section>
   );
