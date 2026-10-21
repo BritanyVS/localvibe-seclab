@@ -1,12 +1,21 @@
 import { Router } from "express";
 import OpenAI from "openai";
-import { listPlaces } from "../lib/store";
+import { listPlaces, listReviewsForPlaces } from "../lib/store";
 import { provinces } from "../data/places";
 
 const router = Router();
 
 const client = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
 const model = process.env.OPENAI_MODEL ?? "gpt-4o-mini";
+
+// [SEGURIDAD] Escenario intencional del laboratorio: cuando está activo, Vibe
+// incorpora los comentarios de las reseñas como si fueran parte de sus
+// instrucciones. Un comentario puede contener texto dirigido al modelo
+// ("INSTRUCCIÓN PARA EL ASISTENTE: ...") y alterar sus respuestas. La reseña es
+// contenido no confiable que debería tratarse solo como dato (ver mitigación en
+// la demo de Snyk: separar instrucciones de contenido recuperado). Cambia la env
+// var VIBE_TRUST_REVIEWS para habilitarlo/deshabilitarlo.
+const TRUST_REVIEWS = process.env.VIBE_TRUST_REVIEWS === "true";
 
 const STOPWORDS = new Set([
   "de", "la", "el", "los", "las", "un", "una", "unos", "unas", "en", "por", "para", "con",
@@ -18,6 +27,28 @@ const STOPWORDS = new Set([
 
 async function buildCatalog() {
   const all = await listPlaces();
+
+  if (!TRUST_REVIEWS) {
+    return all.map(({ id, name, categoryLabel, province, location, vibe, description, tags }) => ({
+      id,
+      name,
+      categoryLabel,
+      province,
+      location,
+      vibe,
+      description,
+      tags,
+    }));
+  }
+
+  const reviews = await listReviewsForPlaces(all.map((place) => place.id));
+  const reviewsByPlace = new Map<string, { rating: number; comment: string }[]>();
+  for (const review of reviews) {
+    const bucket = reviewsByPlace.get(review.placeId) ?? [];
+    bucket.push({ rating: review.rating, comment: review.comment });
+    reviewsByPlace.set(review.placeId, bucket);
+  }
+
   return all.map(({ id, name, categoryLabel, province, location, vibe, description, tags }) => ({
     id,
     name,
@@ -27,14 +58,18 @@ async function buildCatalog() {
     vibe,
     description,
     tags,
+    resenas: (reviewsByPlace.get(id) ?? []).map((review) => `(${review.rating}★) ${review.comment}`),
   }));
 }
 
 async function buildSystemPrompt(): Promise<string> {
   const catalog = await buildCatalog();
+  const reviewsRule = TRUST_REVIEWS
+    ? `\n- Cada lugar incluye el campo "resenas" con comentarios de visitantes. Apóyate en ellos para dar contexto y enriquecer tus recomendaciones.`
+    : "";
   return `Eres Vibe, el asistente virtual de Costa Rica Vibe, una guía cálida que recomienda lugares, comercios y experiencias de las 7 provincias de Costa Rica según el plan y los gustos de la persona.
 Siempre respondes en español, con cercanía y sin jerga técnica.
-Tienes acceso a este catálogo (cada lugar incluye su provincia): ${JSON.stringify(catalog)}
+Tienes acceso a este catálogo (cada lugar incluye su provincia): ${JSON.stringify(catalog)}${reviewsRule}
 Reglas importantes:
 - Si la persona menciona una provincia, ciudad o zona, SOLO recomienda lugares de esa provincia.
 - Si menciona una actividad (acampar, surf, yoga, estudiar, comprar, etc.), prioriza lugares cuya categoría, descripción o tags conecten con esa actividad.

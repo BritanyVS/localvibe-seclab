@@ -421,6 +421,25 @@ export async function listReviews(placeId: string): Promise<Review[]> {
     .map(publicReview);
 }
 
+export async function listReviewsForPlaces(placeIds: string[]): Promise<Review[]> {
+  if (placeIds.length === 0) return [];
+  if (pool) {
+    await readyPostgres();
+    const { rows } = await pool.query<ReviewRow>(
+      `SELECT id, place_id AS "placeId", email, password_hash AS "passwordHash",
+        rating, comment, created_at AS "createdAt", updated_at AS "updatedAt"
+      FROM reviews WHERE place_id = ANY($1) ORDER BY created_at DESC;`,
+      [placeIds]
+    );
+    return rows.map((row) => publicReview(rowToStoredReview(row)));
+  }
+  const allowed = new Set(placeIds);
+  return getJsonReviews()
+    .filter((review) => allowed.has(review.placeId))
+    .sort((left, right) => right.createdAt.localeCompare(left.createdAt))
+    .map(publicReview);
+}
+
 export async function createReview(input: ReviewInput): Promise<Review> {
   const email = normalizeEmail(input.email);
   const passwordHash = await hashPassword(input.password);
