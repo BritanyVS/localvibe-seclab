@@ -96,6 +96,7 @@ export function PlaceModal({ place, onClose }: { place: Place; onClose: () => vo
             </span>
             <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-semibold text-neutral-600">
               {place.price}
+              {place.priceValue > 0 ? ` · ~₡${place.priceValue.toLocaleString("es-CR")}` : ""}
             </span>
           </div>
 

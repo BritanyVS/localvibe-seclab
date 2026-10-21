@@ -25,6 +25,7 @@ router.post(
     }
     const place = await addPlace({
       ...body,
+      priceValue: Number(body.priceValue) || 0,
       rating: Number(body.rating) || 0,
     });
     res.status(201).json({ place });
@@ -37,6 +38,7 @@ router.put(
     const body = req.body ?? {};
     const patch: Partial<Omit<Place, "id">> = {
       ...body,
+      priceValue: Number(body.priceValue) || 0,
       rating: Number(body.rating) || 0,
     };
     delete (patch as Partial<Place>).id;

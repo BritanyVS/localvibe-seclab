@@ -10,6 +10,7 @@ export type Place = {
   description: string;
   tags: string[];
   price: string;
+  priceValue: number;
   rating: number;
   hours: string;
   image: string;

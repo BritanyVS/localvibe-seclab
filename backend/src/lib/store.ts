@@ -30,6 +30,7 @@ type PlaceRow = {
   description: string;
   tags: unknown;
   price: string;
+  priceValue: string | number;
   rating: string | number;
   hours: string;
   image: string;
@@ -88,6 +89,7 @@ CREATE TABLE IF NOT EXISTS places (
   description TEXT NOT NULL,
   tags JSONB NOT NULL DEFAULT '[]',
   price TEXT NOT NULL,
+  price_value NUMERIC NOT NULL DEFAULT 0,
   rating NUMERIC NOT NULL DEFAULT 0,
   hours TEXT NOT NULL,
   image TEXT NOT NULL,
@@ -109,33 +111,35 @@ CREATE TABLE IF NOT EXISTS reviews (
 
 const ALTER_PROVINCE_SQL = `ALTER TABLE places ADD COLUMN IF NOT EXISTS province TEXT NOT NULL DEFAULT '';`;
 
+const ALTER_PRICE_VALUE_SQL = `ALTER TABLE places ADD COLUMN IF NOT EXISTS price_value NUMERIC NOT NULL DEFAULT 0;`;
+
 const SELECT_SQL = `
 SELECT id, slug, name, category, category_label AS "categoryLabel", province,
-  location, vibe, description, tags, price, rating, hours, image, featured
+  location, vibe, description, tags, price, price_value AS "priceValue", rating, hours, image, featured
 FROM places
 ORDER BY id::int DESC;`;
 
 const SELECT_WHERE_SQL = `
 SELECT id, slug, name, category, category_label AS "categoryLabel", province,
-  location, vibe, description, tags, price, rating, hours, image, featured
+  location, vibe, description, tags, price, price_value AS "priceValue", rating, hours, image, featured
 FROM places
 WHERE id = $1;`;
 
 const INSERT_SQL = `
-INSERT INTO places (id, slug, name, category, category_label, location, vibe, description, tags, price, rating, hours, image, featured, province)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb, $10, $11, $12, $13, $14, $15)
+INSERT INTO places (id, slug, name, category, category_label, location, vibe, description, tags, price, price_value, rating, hours, image, featured, province)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb, $10, $11, $12, $13, $14, $15, $16)
 RETURNING *;`;
 
 const INSERT_SEED_SQL = `
-INSERT INTO places (id, slug, name, category, category_label, location, vibe, description, tags, price, rating, hours, image, featured, province)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb, $10, $11, $12, $13, $14, $15)
+INSERT INTO places (id, slug, name, category, category_label, location, vibe, description, tags, price, price_value, rating, hours, image, featured, province)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb, $10, $11, $12, $13, $14, $15, $16)
 ON CONFLICT (slug) DO NOTHING;`;
 
 const UPDATE_SQL = `
 UPDATE places
 SET slug = $2, name = $3, category = $4, category_label = $5, location = $6,
-  vibe = $7, description = $8, tags = $9::jsonb, price = $10, rating = $11,
-  hours = $12, image = $13, featured = $14, province = $15
+  vibe = $7, description = $8, tags = $9::jsonb, price = $10, price_value = $11, rating = $12,
+  hours = $13, image = $14, featured = $15, province = $16
 WHERE id = $1
 RETURNING *;`;
 
@@ -150,6 +154,7 @@ function readyPostgres(): Promise<void> {
   pgReady ??= (async () => {
     await pool.query(CREATE_TABLE_SQL);
     await pool.query(ALTER_PROVINCE_SQL);
+    await pool.query(ALTER_PRICE_VALUE_SQL);
     await pool.query(CREATE_REVIEWS_TABLE_SQL);
     for (const place of seed) {
       const { rows } = await pool.query<{ next: number }>(NEXT_ID_SQL);
@@ -176,6 +181,7 @@ function rowToPlace(row: PlaceRow): Place {
     description: row.description,
     tags: Array.isArray(row.tags) ? row.tags.map(String) : [],
     price: row.price,
+    priceValue: Number(row.priceValue) || 0,
     rating: Number(row.rating),
     hours: row.hours,
     image: row.image,
@@ -195,6 +201,7 @@ function placeParams(place: Place): unknown[] {
     place.description,
     JSON.stringify(place.tags),
     place.price,
+    place.priceValue ?? 0,
     place.rating,
     place.hours,
     place.image,
@@ -225,7 +232,12 @@ function loadJsonItems(): Place[] {
   try {
     if (fs.existsSync(FILE)) {
       const parsed = JSON.parse(fs.readFileSync(FILE, "utf8"));
-      if (Array.isArray(parsed)) return (parsed as Place[]).map((item) => ({ ...item, province: item.province ?? "" }));
+      if (Array.isArray(parsed))
+        return (parsed as Place[]).map((item) => ({
+          ...item,
+          province: item.province ?? "",
+          priceValue: Number(item.priceValue) || 0,
+        }));
     }
   } catch {
   }

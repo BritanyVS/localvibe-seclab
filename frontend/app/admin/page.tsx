@@ -31,6 +31,7 @@ const emptyPlace = (): PlaceInput => ({
   description: "",
   tags: [],
   price: "$",
+  priceValue: 0,
   rating: 4,
   hours: "",
   image: "",
@@ -461,6 +462,19 @@ function FormEditor({
               <option value="$$">$$</option>
               <option value="$$$">$$$</option>
             </select>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className={labelClass}>Precio estimado (₡)</label>
+            <input
+              type="number"
+              min={0}
+              step={500}
+              value={place.priceValue}
+              onChange={(event) => onChange({ ...place, priceValue: Number(event.target.value) })}
+              placeholder="Ej. 18000"
+              className={inputClass}
+            />
           </div>
 
           <div className="space-y-1.5">

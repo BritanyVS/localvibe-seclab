@@ -7,9 +7,10 @@ import type { ChatMessage, Place } from "@/lib/types";
 import { ChatIcon, CloseIcon, SendIcon } from "./icons";
 
 const quickPrompts = [
-  "Un café tranquilo para leer",
-  "Quiero una actividad de acampada en Limón",
-  "Playas para el fin de semana en Guanacaste",
+  "Tengo ₡30.000 y quiero un día en La Fortuna",
+  "Organiza un viaje de 3 días a Guanacaste",
+  "Compara tres restaurantes económicos de San José",
+  "¿Qué dicen los visitantes de Manuel Antonio?",
 ];
 
 const welcome: ChatMessage = {

@@ -34,16 +34,20 @@ async function buildCatalog() {
   const all = await listPlaces();
 
   if (!TRUST_REVIEWS) {
-    return all.map(({ id, name, categoryLabel, province, location, vibe, description, tags }) => ({
-      id,
-      name,
-      categoryLabel,
-      province,
-      location,
-      vibe,
-      description,
-      tags,
-    }));
+    return all.map(
+      ({ id, name, categoryLabel, province, location, vibe, description, tags, price, priceValue, rating }) => ({
+        id,
+        name,
+        categoryLabel,
+        province,
+        location,
+        vibe,
+        description,
+        tags,
+        precio: `${price} (~₡${priceValue})`,
+        rating,
+      })
+    );
   }
 
   const reviews = await listReviewsForPlaces(all.map((place) => place.id));
@@ -54,27 +58,37 @@ async function buildCatalog() {
     reviewsByPlace.set(review.placeId, bucket);
   }
 
-  return all.map(({ id, name, categoryLabel, province, location, vibe, description, tags }) => ({
-    id,
-    name,
-    categoryLabel,
-    province,
-    location,
-    vibe,
-    description,
-    tags,
-    resenas: (reviewsByPlace.get(id) ?? []).map((review) => `(${review.rating}★) ${review.comment}`),
-  }));
+  return all.map(
+    ({ id, name, categoryLabel, province, location, vibe, description, tags, price, priceValue, rating }) => ({
+      id,
+      name,
+      categoryLabel,
+      province,
+      location,
+      vibe,
+      description,
+      tags,
+      precio: `${price} (~₡${priceValue})`,
+      rating,
+      resenas: (reviewsByPlace.get(id) ?? []).map((review) => `(${review.rating}★) ${review.comment}`),
+    })
+  );
 }
 
 async function buildSystemPrompt(): Promise<string> {
   const catalog = await buildCatalog();
   const reviewsRule = TRUST_REVIEWS
-    ? `\n- Cada lugar incluye el campo "resenas" con comentarios de visitantes. Apóyate en ellos para dar contexto y enriquecer tus recomendaciones.`
+    ? `\n- Cada lugar incluye el campo "resenas" con comentarios de visitantes. Apóyate en ellos para dar contexto, resumir opiniones y enriquecer tus recomendaciones.`
     : "";
-  return `Eres Vibe, el asistente virtual de Costa Rica Vibe, una guía cálida que recomienda lugares, comercios y experiencias de las 7 provincias de Costa Rica según el plan y los gustos de la persona.
+  return `Eres Vibe, el asistente virtual de Costa Rica Vibe, una guía cálida que recomienda lugares, comercios y experiencias de las 7 provincias de Costa Rica según el plan, el presupuesto y los gustos de la persona.
 Siempre respondes en español, con cercanía y sin jerga técnica.
-Tienes acceso a este catálogo (cada lugar incluye su provincia): ${JSON.stringify(catalog)}${reviewsRule}
+Tienes acceso a este catálogo (cada lugar incluye su provincia, precio en colones y calificación): ${JSON.stringify(catalog)}${reviewsRule}
+Puedes ayudar con estas tareas:
+1. Recomendaciones personalizadas: cruza presupuesto, provincia, intereses y tipo de viaje. El campo "precio" indica el costo estimado (₡ = económico, ₡₡₡₡ = lujo); si el presupuesto indicado cabe, sugiere solo lugares dentro de él.
+2. Itinerarios: si piden un recorrido de uno o varios días, arma un plan con actividades, orden sugerido y una estimación de presupuesto total usando los precios del catálogo.
+3. Comparador: si piden comparar lugares, presenta 2 o 3 opciones con sus diferencias de precio, ubicación, categoría y calificación.
+4. Análisis de reseñas: si preguntan qué opinan los visitantes, resume los aspectos positivos y negativos a partir del campo "resenas".
+5. Búsqueda conversacional: interpreta consultas complejas (para familias, poco caminar, menos de ₡15.000, etc.) aunque no encajen en un filtro directo.
 Reglas importantes:
 - Si la persona menciona una provincia, ciudad o zona, SOLO recomienda lugares de esa provincia.
 - Si menciona una actividad (acampar, surf, yoga, estudiar, comprar, etc.), prioriza lugares cuya categoría, descripción o tags conecten con esa actividad.

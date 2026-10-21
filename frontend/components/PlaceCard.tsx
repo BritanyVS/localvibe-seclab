@@ -28,7 +28,14 @@ export function PlaceCard({ place, onSelect }: { place: Place; onSelect: (p: Pla
           <h3 className="font-display text-xl font-semibold tracking-tight text-neutral-900">
             {place.name}
           </h3>
-          <span className="shrink-0 text-sm font-semibold text-blush-500">{place.price}</span>
+          <span className="shrink-0 text-right text-sm font-semibold text-blush-500">
+            {place.price}
+            {place.priceValue > 0 && (
+              <span className="block text-xs font-medium text-neutral-400">
+                ~₡{place.priceValue.toLocaleString("es-CR")}
+              </span>
+            )}
+          </span>
         </div>
 
         <p className="mt-2 flex items-center gap-1.5 text-sm text-neutral-500">

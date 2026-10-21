@@ -411,6 +411,7 @@ components:
         - description
         - tags
         - price
+        - priceValue
         - rating
         - hours
         - image
@@ -441,6 +442,10 @@ components:
           items: { type: string }
         price:
           type: string
+          description: Nivel de precio en símbolos (₡, ₡₡, ₡₡₡, ₡₡₡₡).
+        priceValue:
+          type: number
+          description: Costo estimado en colones costarricenses (₡).
         rating:
           type: number
           format: float
@@ -474,6 +479,8 @@ components:
           items: { type: string }
         price:
           type: string
+        priceValue:
+          type: number
         rating:
           type: number
           format: float
