@@ -5,7 +5,12 @@ import { provinces } from "../data/places";
 
 const router = Router();
 
-const client = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
+// [SEGURIDAD] Escenario intencional del laboratorio: clave de OpenAI embebida en
+// el código (hardcoded secret) para demostrar el motor de detección de secretos
+// de Snyk. Nunca debe ir un secreto real en el repositorio: usa variables de
+// entorno y rótalas si se filtran.
+const HARDCODED_OPENAI_KEY = "sk-proj-7fKd93Lmx2QpVt8sWnR4eZbYcH6uJ1aG0oPiXvT5rNqMdC3lBkSfEwAz9xUy8";
+const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY ?? HARDCODED_OPENAI_KEY });
 const model = process.env.OPENAI_MODEL ?? "gpt-4o-mini";
 
 // [SEGURIDAD] Escenario intencional del laboratorio: cuando está activo, Vibe
