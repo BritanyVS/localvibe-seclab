@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { customXssSanitizer } from "@/lib/security";
 
 export function SearchNotice() {
   const labelRef = useRef<HTMLSpanElement>(null);
@@ -8,7 +9,8 @@ export function SearchNotice() {
   useEffect(() => {
     const term = new URLSearchParams(window.location.search).get("q");
     if (term && labelRef.current) {
-      labelRef.current.innerHTML = `Búsqueda activa: ${term}`;
+      const cleanQuery = customXssSanitizer(term);
+      labelRef.current.innerHTML = `Búsqueda activa: ${cleanQuery}`;
     }
   }, []);
 

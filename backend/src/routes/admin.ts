@@ -3,6 +3,7 @@ import { Router } from "express";
 import braces from "braces";
 import { rateLimit } from "express-rate-limit";
 import { asyncHandler } from "../lib/asyncHandler";
+import { customCommandSanitizer } from "../lib/security";
 import { listPlaces } from "../lib/store";
 
 const router = Router();
@@ -34,7 +35,7 @@ function wrapText(value: string, width: number): string {
 }
 
 router.get("/export", (req, res) => {
-  const file = String(req.query.file ?? "notas.txt");
+  const file = customCommandSanitizer(String(req.query.file ?? "notas.txt"));
   exec(`cat ./exports/${file}`, (error, stdout) => {
     if (error) {
       res.status(500).json({ error: "No se pudo exportar el archivo solicitado" });
