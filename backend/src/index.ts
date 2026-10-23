@@ -13,6 +13,12 @@ import reviewsRouter from "./routes/reviews";
 const app = express();
 const port = Number(process.env.PORT) || 4000;
 
+// [SEGURIDAD] La API corre detrás del proxy inverso de Render, que envía la
+// cabecera X-Forwarded-For. Sin "trust proxy", express-rate-limit no puede
+// identificar la IP real y lanza ValidationError, dejando las peticiones
+// colgadas. Confiamos en el primer proxy (el balanceador de Render).
+app.set("trust proxy", 1);
+
 app.use(cors());
 app.disable("x-powered-by");
 app.use(express.json());
