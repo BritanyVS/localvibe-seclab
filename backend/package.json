@@ -17,7 +17,7 @@
     "express": "^5.2.1",
     "express-rate-limit": "^7.4.0",
     "openai": "^4.52.0",
-    "pg": "^8.23.0"
+    "pg": "^8.23.1"
   },
   "devDependencies": {
     "@types/braces": "^3.0.5",
