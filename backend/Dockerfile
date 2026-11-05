@@ -1,11 +1,11 @@
-FROM node:18.20.5-alpine3.19 AS build
+FROM node:18.12.0-slim AS build
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
 RUN npm run build
 
-FROM node:18.20.5-alpine3.19 AS runtime
+FROM node:18.12.0-slim AS runtime
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci --omit=dev && npm cache clean --force
