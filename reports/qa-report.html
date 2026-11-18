@@ -1,0 +1,155 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Reporte QA · LocalVibe</title><style>
+:root{--ink:#1a2233;--muted:#5c6b7f;--line:#dfe5ec;--bg:#f5f7fa;--card:#fff;
+--ok:#1b7f4b;--critical:#a1122b;--high:#c62828;--medium:#e07b00;--low:#2f7d32;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+.wrap{max-width:1080px;margin:0 auto;padding:28px 20px 60px}
+header h1{margin:0 0 6px;font-size:28px}
+.sub{color:var(--muted);margin:0 0 24px}
+.badge{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;color:#fff;background:#455a64}
+.b-critical{background:var(--critical)}.b-high{background:var(--high)}.b-medium{background:var(--medium)}
+.b-low{background:var(--low)}.b-info{background:#546e7a}.b-unknown{background:#455a64}
+.b-ok{background:var(--ok)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:0 0 22px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.kpi .n{font-size:30px;font-weight:750;line-height:1.1}
+.kpi .l{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.04em;margin-top:4px}
+section{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin:0 0 18px}
+h2{margin:0 0 12px;font-size:19px}h3{margin:20px 0 10px;font-size:15px;color:var(--muted)}
+.callout{border-left:4px solid var(--medium);background:#fffaf0}
+.callout p{margin:6px 0}
+ul.tests{list-style:none;padding:0;margin:0}
+ul.tests li{padding:9px 12px;border:1px solid var(--line);border-radius:8px;margin-bottom:8px;display:flex;gap:10px;align-items:baseline}
+ul.tests li.fail{border-color:#f3c2c2;background:#fff5f5}
+.test-name{flex:1}.suite{color:var(--muted);font-size:12px}
+.item{border:1px solid var(--line);border-left:4px solid var(--line);border-radius:8px;padding:12px 14px;margin:0 0 10px}
+.item.critical{border-left-color:var(--critical)}.item.high{border-left-color:var(--high)}
+.item.medium{border-left-color:var(--medium)}.item.low{border-left-color:var(--low)}
+.item h4{margin:0 0 6px;font-size:15px}
+.meta{color:var(--muted);font-size:12px;margin:0 0 8px}
+.kv{margin:3px 0}.kv b{display:inline-block;min-width:120px;color:var(--muted);font-weight:600}
+code{background:#eef2f6;border-radius:4px;padding:1px 5px;font-size:12px;word-break:break-all}
+.warn{background:#fffaf0;border:1px solid #f0dfb8;border-radius:8px;padding:10px 12px;margin:8px 0}
+pre{white-space:pre-wrap;word-break:break-word;font-size:12px;color:var(--muted);margin:6px 0 0}
+a{color:#145da0}
+footer{color:var(--muted);font-size:12px;text-align:center;margin-top:26px}
+</style></head><body><div class="wrap">
+<header><h1>Reporte QA · LocalVibe</h1>
+<p class="sub">Generado: 2026-11-18T20:33:27.543Z · Org: grupo-cero-uno-zero-tecnologias-s.a-default · Estado del build: <span class="badge b-unstable">UNSTABLE</span></p></header>
+<div class="kpis">
+<div class="kpi"><div class="n" style="color:var(--ok)">2/2</div><div class="l">Pruebas funcionales OK</div></div>
+<div class="kpi"><div class="n" style="color:var(--critical)">12</div><div class="l">Hallazgos de seguridad</div></div>
+<div class="kpi"><div class="n">2 · 9 · 1</div><div class="l">Code · Open Source · IaC</div></div>
+<div class="kpi"><div class="n">1</div><div class="l">Avisos no bloqueantes</div></div>
+</div>
+<section class="callout"><h2>Cómo leer este reporte</h2>
+<p><b>Las pruebas funcionales pasan y Snyk marca hallazgos; no es una contradicción.</b></p>
+<p>Los tests verifican que la búsqueda muestra el término. Snyk verifica que ese mismo término llega a un <code>innerHTML</code>, que hay secretos en el código y que las versiones instaladas tienen CVEs conocidos. Un test en verde confirma que la función hace lo que promete, no que sea segura.</p>
+<p>El gate del pipeline usa <code>unstable()</code> como modo de transición: el build queda <b>UNSTABLE</b> (aviso visible) en lugar de fallar. Los hallazgos con severidad <b>high/critical</b> en Code y OSS, y <b>medium</b> en IaC, son los que disparan el aviso.</p></section>
+<section><h2>1. Pruebas funcionales (QA)</h2>
+<ul class="tests">
+<li class=""><span class="badge b-ok">PASS</span>
+<span class="test-name">SearchNotice — prueba funcional &gt; muestra el término de búsqueda activo</span><span class="suite">__tests__/SearchNotice.test.tsx · 0.0862785s</span></li>
+<li class=""><span class="badge b-ok">PASS</span>
+<span class="test-name">SearchNotice — prueba funcional &gt; conserva acentos y espacios del término</span><span class="suite">__tests__/SearchNotice.test.tsx · 0.0101007s</span></li>
+</ul></section>
+<section><h2>2. Snyk Code — hallazgos en el código</h2>
+<div class="item high">
+<h4><span class="badge b-high">high</span> DOM-based Cross-site Scripting (XSS)</h4>
+<p class="meta">javascript/DOMXSS · CWE-79 · prioridad 600 · nivel Snyk: error</p>
+<p class="kv"><b>Dónde</b> <code>frontend/components/SearchNotice.tsx:11</code></p>
+<p class="kv"><b>Qué pasa</b> Unsanitized input from the document location flows into innerHTML, where it is used to dynamically construct the HTML page on client side. This may result in a DOM Based Cross-Site Scripting attack (DOMXSS).</p>
+<p class="kv"><b>Por qué el test no lo ve</b> Los tests comprobaban que el término aparece en pantalla, no que el navegador lo trate como texto. Con un payload en ?q= el test sigue en verde mientras el HTML se ejecuta.</p>
+<p class="kv"><b>Cómo corregirlo</b> Sustituir innerHTML por textContent en frontend/components/SearchNotice.tsx:11 (o sanitizar con una allowlist) y añadir un test con payload malicioso.</p></div>
+<div class="item high">
+<h4><span class="badge b-high">high</span> Hardcoded Non-Cryptographic Secret</h4>
+<p class="meta">javascript/HardcodedNonCryptoSecret · CWE-547 · prioridad 600 · nivel Snyk: error</p>
+<p class="kv"><b>Dónde</b> <code>backend/src/routes/concierge.ts:12</code></p>
+<p class="kv"><b>Qué pasa</b> Avoid hardcoding values that are meant to be secret. Found a hardcoded string used in here.</p>
+<p class="kv"><b>Por qué el test no lo ve</b> La llamada al concierge funciona usando la clave embebida, así que la prueba funcional no detecta que el secreto vive en el código fuente.</p>
+<p class="kv"><b>Cómo corregirlo</b> Usar solo OPENAI_API_KEY desde variables de entorno, eliminar la constante y rotar la clave expuesta.</p></div>
+</section>
+<section><h2>3. Snyk Open Source — dependencias</h2>
+<h3>localvibe-backend · <code>backend/package-lock.json</code> · 2 únicos · 3 vulnerable dependency paths</h3>
+<div class="item high">
+<h4><span class="badge b-high">high</span> Uncaught Exception</h4>
+<p class="meta">SNYK-JS-BODYPARSER-21431495 · body-parser@2.3.0 · CVE-2026-111181 · CVSS 8.7 · exploit: Not Defined</p>
+<p class="kv"><b>Ruta</b> <code>express@5.2.1 → body-parser@2.3.0</code></p>
+<p class="kv"><b>Impacto</b> Un cuerpo comprimido con bytes sobrantes provoca una excepción no controlada y puede caer el proceso del backend (denegación de servicio).</p>
+<p class="kv"><b>Corrección</b> Sin ruta directa: revisar express@5.2.1 o aplicar un override de npm (versiones fijas: 1.20.9, 2.4.0)</p></div>
+<div class="item high">
+<h4><span class="badge b-high">high</span> Uncaught Exception</h4>
+<p class="meta">SNYK-JS-QS-20943482 · qs@6.16.0 · CVE-2026-110816 · CVSS 8.2 · exploit: Proof of Concept</p>
+<p class="kv"><b>Ruta</b> <code>express@5.2.1 → qs@6.16.0</code></p>
+<p class="kv"><b>Impacto</b> Con arrayFormat: 'comma' y elementos sin toString, el parser lanza TypeError y puede tumbar el proceso; existe PoC público.</p>
+<p class="kv"><b>Corrección</b> Sin ruta directa: revisar express@5.2.1 o aplicar un override de npm (versiones fijas: 6.16.1)</p></div>
+<div class="item high">
+<h4><span class="badge b-high">high</span> Uncaught Exception</h4>
+<p class="meta">SNYK-JS-QS-20943482 · qs@6.16.0 · CVE-2026-110816 · CVSS 8.2 · exploit: Proof of Concept</p>
+<p class="kv"><b>Ruta</b> <code>express@5.2.1 → body-parser@2.3.0 → qs@6.16.0</code></p>
+<p class="kv"><b>Impacto</b> Con arrayFormat: 'comma' y elementos sin toString, el parser lanza TypeError y puede tumbar el proceso; existe PoC público.</p>
+<p class="kv"><b>Corrección</b> Sin ruta directa: revisar body-parser@2.3.0 o aplicar un override de npm (versiones fijas: 6.16.1)</p></div>
+<h3>localvibe-frontend · <code>frontend/package-lock.json</code> · 7 únicos · 7 vulnerable dependency paths</h3>
+<div class="item critical">
+<h4><span class="badge b-critical">critical</span> Deserialization of Untrusted Data</h4>
+<p class="meta">SNYK-JS-NEXT-21460652 · next@16.3.6 · sin CVE · CVSS 9.5 · exploit: Not Defined</p>
+<p class="kv"><b>Ruta</b> <code>next@16.3.6</code></p>
+<p class="kv"><b>Impacto</b> El framework arrastra advisories de ejecución remota, deserialización, SSRF y agotamiento de CPU. Afecta al frontend aunque la UI funcione.</p>
+<p class="kv"><b>Corrección</b> Actualizar a next@16.4.1 (versiones fijas: 16.4.1)</p></div>
+<div class="item critical">
+<h4><span class="badge b-critical">critical</span> Remote Code Execution (RCE)</h4>
+<p class="meta">SNYK-JS-NEXT-21243979 · next@16.3.6 · sin CVE · CVSS 9.5 · exploit: Not Defined</p>
+<p class="kv"><b>Ruta</b> <code>next@16.3.6</code></p>
+<p class="kv"><b>Impacto</b> El framework arrastra advisories de ejecución remota, deserialización, SSRF y agotamiento de CPU. Afecta al frontend aunque la UI funcione.</p>
+<p class="kv"><b>Corrección</b> Actualizar a next@16.4.1 (versiones fijas: 16.4.1)</p></div>
+<div class="item critical">
+<h4><span class="badge b-critical">critical</span> Dependency on Vulnerable Third-Party Component</h4>
+<p class="meta">SNYK-JS-NEXT-21460650 · next@16.3.6 · sin CVE · CVSS 9.5 · exploit: Not Defined</p>
+<p class="kv"><b>Ruta</b> <code>next@16.3.6</code></p>
+<p class="kv"><b>Impacto</b> El framework arrastra advisories de ejecución remota, deserialización, SSRF y agotamiento de CPU. Afecta al frontend aunque la UI funcione.</p>
+<p class="kv"><b>Corrección</b> Actualizar a next@16.4.1 (versiones fijas: 15.5.28, 16.4.1)</p></div>
+<div class="item high">
+<h4><span class="badge b-high">high</span> Allocation of Resources Without Limits or Throttling</h4>
+<p class="meta">SNYK-JS-NEXT-21460651 · next@16.3.6 · CVE-2026-94482 · CVSS 8.2 · exploit: Not Defined</p>
+<p class="kv"><b>Ruta</b> <code>next@16.3.6</code></p>
+<p class="kv"><b>Impacto</b> El framework arrastra advisories de ejecución remota, deserialización, SSRF y agotamiento de CPU. Afecta al frontend aunque la UI funcione.</p>
+<p class="kv"><b>Corrección</b> Actualizar a next@16.4.1 (versiones fijas: 15.5.28, 16.4.1)</p></div>
+<div class="item high">
+<h4><span class="badge b-high">high</span> Excessive Iteration</h4>
+<p class="meta">SNYK-JS-NEXT-21246253 · next@16.3.6 · sin CVE · CVSS 8.2 · exploit: Not Defined</p>
+<p class="kv"><b>Ruta</b> <code>next@16.3.6</code></p>
+<p class="kv"><b>Impacto</b> El framework arrastra advisories de ejecución remota, deserialización, SSRF y agotamiento de CPU. Afecta al frontend aunque la UI funcione.</p>
+<p class="kv"><b>Corrección</b> Actualizar a next@16.4.1 (versiones fijas: 15.5.28, 16.4.1)</p></div>
+<div class="item high">
+<h4><span class="badge b-high">high</span> Regular Expression Denial of Service (ReDoS)</h4>
+<p class="meta">SNYK-JS-SEMVER-3247795 · semver@5.7.1 · CVE-2022-25883 · CVSS 7.5 · exploit: Proof of Concept</p>
+<p class="kv"><b>Ruta</b> <code>semver@5.7.1</code></p>
+<p class="kv"><b>Impacto</b> Un rango de versión manipulado dispara backtracking exponencial (ReDoS) y consume CPU del proceso.</p>
+<p class="kv"><b>Corrección</b> Actualizar a semver@5.7.2 (versiones fijas: 5.7.2, 6.3.1, 7.5.2)</p></div>
+<div class="item high">
+<h4><span class="badge b-high">high</span> Server-side Request Forgery (SSRF)</h4>
+<p class="meta">SNYK-JS-NEXT-20366781 · next@16.3.6 · CVE-2026-94483 · CVSS 8.3 · exploit: Not Defined</p>
+<p class="kv"><b>Ruta</b> <code>next@16.3.6</code></p>
+<p class="kv"><b>Impacto</b> El framework arrastra advisories de ejecución remota, deserialización, SSRF y agotamiento de CPU. Afecta al frontend aunque la UI funcione.</p>
+<p class="kv"><b>Corrección</b> Actualizar a next@16.3.8 (versiones fijas: 16.3.8)</p></div>
+</section>
+<section><h2>4. Snyk IaC — infraestructura</h2>
+<div class="item medium">
+<h4><span class="badge b-medium">medium</span> Security Group allows open ingress</h4>
+<p class="meta">SNYK-CC-TF-1 · <code>iac/main.tf:23</code></p>
+<p class="kv"><b>Qué pasa</b> That inbound traffic is allowed to a resource from any source instead of a restricted range</p>
+<p class="kv"><b>Impacto</b> That potentially everyone can access your resource</p>
+<p class="kv"><b>Corrección</b> Set cidr_block attribute with a more restrictive IP, for example 192.16.0.0/24</p></div>
+</section>
+<section><h2>5. Avisos y artefactos</h2>
+<div class="warn"><b>snyk-oss.json.err</b> (no bloquea el build)<pre>package-lock.json: Could not find package.json at package.json (lockfile found at package-lock.json) ✗ 1/3 potential projects failed to get dependencies</pre></div>
+<p>Detalle completo, por si necesitas profundizar:</p><ul>
+<li><a href="../frontend/test-results.xml">frontend/test-results.xml</a></li>
+<li><a href="../snyk-code.sarif">snyk-code.sarif</a></li>
+<li><a href="../snyk-oss.json">snyk-oss.json</a></li>
+<li><a href="../snyk-iac.json">snyk-iac.json</a></li>
+</ul></section>
+<footer>Reporte generado automáticamente por <code>scripts/generate-qa-report.mjs</code>. No incluye tokens ni secretos.</footer>
+</div></body></html>

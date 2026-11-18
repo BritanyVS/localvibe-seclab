@@ -98,8 +98,19 @@ pipeline {
 
   post {
     always {
+      script {
+        // Reporte legible para QA: convierte los artefactos crudos en HTML + Markdown.
+        // Se genera en post/always para que exista incluso si el gate cambia a error().
+        if (fileExists('scripts/generate-qa-report.mjs')) {
+          def rc = bat returnStatus: true,
+                     script: 'node scripts/generate-qa-report.mjs --input . --output reports/qa-report --status "%BUILD_STATUS%"'
+          if (rc != 0) {
+            echo 'AVISO: no se pudo generar el reporte QA; se archivan solo los artefactos crudos.'
+          }
+        }
+      }
       archiveArtifacts allowEmptyArchive: true,
-                       artifacts: 'snyk-*.json, snyk-*.sarif, snyk-*.err, frontend/test-results.xml'
+                       artifacts: 'reports/qa-report.html, reports/qa-report.md, snyk-*.json, snyk-*.sarif, snyk-*.err, frontend/test-results.xml'
     }
   }
 }
