@@ -2,15 +2,6 @@
 	"folders": [
 		{
 			"path": "."
-		},
-		{
-			"path": "backend"
-		},
-		{
-			"path": "frontend"
-		},
-		{
-			"path": "iac"
 		}
 	],
 	"settings": {}
