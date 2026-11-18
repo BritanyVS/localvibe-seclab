@@ -1,27 +1,33 @@
 pipeline {
-  agent any 
-  tools { 
-    nodejs 'node-20' 
-  } 
-  environment {
-    // Reemplaza con el nombre de tu organización real en Snyk si es necesario
-    SNYK_ORG = 'grupo-cero-uno-zero-tecnologias-s.a-default' 
+  agent any
+
+  tools {
+    // El nombre del tool instalado en Jenkins (aunque descargue Node v26.13.1)
+    nodejs 'node-20'
   }
+
+  environment {
+    SNYK_ORG = 'grupo-cero-uno-zero-tecnologias-s.a-default'
+    // Región US (la misma que usa la extensión). Si tu org está en la región
+    // global/EU, cámbialo por https://api.snyk.io o elimina esta variable.
+    SNYK_API = 'https://api.us.snyk.io'
+  }
+
   stages {
     stage('Checkout') {
-      steps { 
-        checkout scm 
+      steps {
+        checkout scm
       }
     }
-    
+
     stage('Dependencias') {
       steps {
-        dir('frontend') { 
-          bat 'npm ci --no-audit --no-fund' // Usa 'sh' si tu agente es Linux/Mac en lugar de Windows
+        dir('frontend') {
+          bat 'npm ci --no-audit --no-fund'
         }
       }
     }
-    
+
     stage('Pruebas funcionales — QA') {
       steps {
         dir('frontend') {
@@ -34,34 +40,66 @@ pipeline {
         }
       }
     }
-    
-    stage('Snyk Security Gate') {
+
+    // Autenticación explícita: el error "Use `snyk auth` to authenticate."
+    // significa que la CLI no encontró el token. Lo fijamos con snyk auth y
+    // validamos con whoami ANTES de escanear, para que un 401 no se disfrace
+    // de "vulnerabilidades encontradas".
+    stage('Snyk: autenticación') {
       steps {
-        withCredentials([string(credentialsId: 'snyk-service-token', variable: 'SNYK_TOKEN')]) {
-          bat 'npm i -g snyk'
-          script {
-            // 1. Snyk Open Source (SCA)
-            def oss = bat returnStatus: true,
-                script: 'snyk test --all-projects --json --severity-threshold=high --org=%SNYK_ORG% > snyk-oss.json'
-            if (oss != 0) { unstable('Snyk OSS: hallazgos high/critical encontrados') }
-            
-            // 2. Snyk Code (SAST - XSS, Secretos)
-            def code = bat returnStatus: true,
-                script: 'snyk code test --json --severity-threshold=high --org=%SNYK_ORG% > snyk-code.sarif'
-            if (code != 0) { unstable('Snyk Code: Se detectaron vulnerabilidades de código o secretos') }
-            
-            // 3. Snyk IaC (Infraestructura como código)
-            def iac = bat returnStatus: true,
-                script: 'snyk iac test iac/main.tf --json --severity-threshold=high --org=%SNYK_ORG% > snyk-iac.json'
-            if (iac != 0) { unstable('Snyk IaC: Configuraciones de infraestructura inseguras') }
+        withCredentials([string(credentialsId: 'snyk-service-token',
+                                variable: 'SNYK_TOKEN')]) {
+          withEnv(["SNYK_TOKEN=${env.SNYK_TOKEN}", "SNYK_API=${env.SNYK_API}"]) {
+            bat 'npm i -g --allow-scripts=snyk snyk@1.1308.4'
+            bat 'snyk auth %SNYK_TOKEN%'
+            bat 'snyk whoami'
           }
         }
       }
     }
-  }  
+
+    stage('Snyk Security Gate') {
+      steps {
+        withCredentials([string(credentialsId: 'snyk-service-token',
+                                variable: 'SNYK_TOKEN')]) {
+          withEnv(["SNYK_TOKEN=${env.SNYK_TOKEN}", "SNYK_API=${env.SNYK_API}"]) {
+            script {
+              def escanear = { String cmd, String salida ->
+                def rc = bat returnStatus: true,
+                           script: "${cmd} 1>${salida} 2>${salida}.err"
+                if (fileExists(salida)) {
+                  def txt = readFile(salida)
+                  if (txt.contains('Use `snyk auth`') ||
+                      txt.contains('SNYK-0005') ||
+                      txt.contains('Authentication error') ||
+                      txt.contains('401 Unauthorized')) {
+                    error("FALLO DE AUTENTICACIÓN Snyk en ${salida}: revisa el Secret Text 'snyk-service-token' y SNYK_API")
+                  }
+                }
+                if (rc != 0) {
+                  unstable("Hallazgos Snyk en ${salida}")
+                }
+              }
+
+              // 1. Open Source (SCA)
+              escanear('snyk test --all-projects --json --severity-threshold=high --org=%SNYK_ORG%', 'snyk-oss.json')
+
+              // 2. Code (SAST - DOM XSS + secreto hardcoded)
+              escanear('snyk code test --json --severity-threshold=high --org=%SNYK_ORG%', 'snyk-code.sarif')
+
+              // 3. IaC: los hallazgos son medium/low, por eso el threshold es medium
+              escanear('snyk iac test iac/main.tf --json --severity-threshold=medium --org=%SNYK_ORG%', 'snyk-iac.json')
+            }
+          }
+        }
+      }
+    }
+  }
+
   post {
     always {
-      archiveArtifacts allowEmptyArchive: true, artifacts: 'snyk-*.json, snyk-*.sarif, frontend/test-results.xml'
+      archiveArtifacts allowEmptyArchive: true,
+                       artifacts: 'snyk-*.json, snyk-*.sarif, snyk-*.err, frontend/test-results.xml'
     }
   }
 }
