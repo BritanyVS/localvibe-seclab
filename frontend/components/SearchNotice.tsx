@@ -11,7 +11,7 @@ export function SearchNotice() {
       labelRef.current.innerHTML = `Búsqueda activa: ${term}`;
     }
   }, []);
-
+ 
   return (
     <span
       ref={labelRef}
