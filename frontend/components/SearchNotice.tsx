@@ -8,10 +8,10 @@ export function SearchNotice() {
   useEffect(() => {
     const term = new URLSearchParams(window.location.search).get("q");
     if (term && labelRef.current) {
-      labelRef.current.innerHTML = `Búsqueda activa: ${term}`;
+      labelRef.current.textContent = `Búsqueda activa: ${term}`;
     }
   }, []);
- 
+
   return (
     <span
       ref={labelRef}
